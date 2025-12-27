@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard,
     Link as LinkIcon,
@@ -9,6 +9,12 @@ import {
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem('phishguard_currentUser');
+        navigate('/');
+    };
     const navItems = [
         { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
         { name: 'URL Analysis', icon: LinkIcon, path: '/dashboard/url' },
@@ -61,7 +67,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                     </nav>
 
                     <div className="mt-auto pt-4 border-t border-white/10">
-                        <button className="flex items-center gap-3 w-full px-4 py-3 text-white/60 hover:text-red-400 hover:bg-red-400/5 rounded-xl transition-all">
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-3 w-full px-4 py-3 text-white/60 hover:text-red-400 hover:bg-red-400/5 rounded-xl transition-all"
+                        >
                             <LogOut className="w-5 h-5" />
                             <span className="font-medium">Logout</span>
                         </button>

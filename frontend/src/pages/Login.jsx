@@ -14,16 +14,24 @@ const Login = () => {
         setLoading(true);
         setError('');
 
-        // Mock authentication
+        // Mock authentication check
         setTimeout(() => {
-            if (formData.email && formData.password) {
-                // In a real app, you'd verify credentials here
-                navigate('/dashboard');
-            } else {
-                setError('Please fill in all fields.');
+            try {
+                const existingUsers = JSON.parse(localStorage.getItem('phishguard_users') || '[]');
+                const user = existingUsers.find(u => u.email === formData.email && u.password === formData.password);
+
+                if (user) {
+                    localStorage.setItem('phishguard_currentUser', JSON.stringify(user));
+                    navigate('/dashboard');
+                } else {
+                    setError('Invalid email or password. Please create an account if you haven\'t.');
+                }
+            } catch (err) {
+                setError('Login failed. Please try again.');
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
-        }, 1000);
+        }, 800);
     };
 
     return (

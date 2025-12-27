@@ -25,15 +25,34 @@ const Register = () => {
             return;
         }
 
-        // Mock registration
+        // Mock registration logic
         setTimeout(() => {
-            if (formData.name && formData.email && formData.password) {
+            try {
+                const existingUsers = JSON.parse(localStorage.getItem('phishguard_users') || '[]');
+
+                if (existingUsers.some(u => u.email === formData.email)) {
+                    setError('User already exists with this email.');
+                    setLoading(false);
+                    return;
+                }
+
+                const newUser = {
+                    name: formData.name,
+                    email: formData.email,
+                    password: formData.password
+                };
+
+                const updatedUsers = [...existingUsers, newUser];
+                localStorage.setItem('phishguard_users', JSON.stringify(updatedUsers));
+                localStorage.setItem('phishguard_currentUser', JSON.stringify(newUser));
+
                 navigate('/dashboard');
-            } else {
-                setError('Please fill in all fields.');
+            } catch (err) {
+                setError('Registration failed. Please try again.');
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
-        }, 1000);
+        }, 800);
     };
 
     return (

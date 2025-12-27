@@ -30,9 +30,13 @@ const DashboardHome = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [user, setUser] = useState(null);
 
     const loadStats = async () => {
         try {
+            const currentUser = JSON.parse(localStorage.getItem('phishguard_currentUser') || '{}');
+            setUser(currentUser);
+
             const res = await fetchDashboardStats();
             setStats(res.data);
             setError(null);
@@ -80,7 +84,9 @@ const DashboardHome = () => {
         <div className="space-y-8 pb-12">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold text-white mb-2">Live Security Dashboard</h2>
+                    <h2 className="text-3xl font-bold text-white mb-2">
+                        Welcome, <span className="text-emerald-400 capitalize">{user?.name || 'Agent'}</span>
+                    </h2>
                     <p className="text-white/50 text-sm">Real-time monitoring of global phishing scan activities.</p>
                 </div>
                 {error && (
