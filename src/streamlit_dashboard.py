@@ -1,5 +1,12 @@
 import streamlit as st
 import os
+
+# ==============================================================================
+# ⚠️ LEGACY / OPTIONAL DASHBOARD
+# This Streamlit dashboard is maintained for backward compatibility.
+# The primary, modern UI is the React-based dashboard located in the /frontend folder.
+# ==============================================================================
+
 from analysis_engine import (
     fetch_live_html, extract_suspicious_snippets, analyze_phishing,
     extract_email_signals, analyze_email_phishing

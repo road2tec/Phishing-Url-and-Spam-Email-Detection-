@@ -6,8 +6,12 @@ import {
     Eye,
     BarChart3,
     Code2,
-    MailWarning
+    MailWarning,
+    ArrowLeft
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const Features = () => {
     const containerVariants = {
@@ -58,8 +62,10 @@ const Features = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-cyber-dark py-20 px-4">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-cyber-dark relative overflow-hidden">
+            <Navbar ToggleSidebar={() => { }} />
+
+            <div className="max-w-7xl mx-auto px-4 py-20 relative z-10">
                 <div className="text-center mb-16">
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
@@ -104,7 +110,17 @@ const Features = () => {
                         </motion.div>
                     ))}
                 </motion.div>
+
+                {/* Back to Home */}
+                <div className="mt-20 text-center">
+                    <Link to="/" className="inline-flex items-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl border border-white/10 transition-all group">
+                        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                        <span>Back to Home</span>
+                    </Link>
+                </div>
             </div>
+
+            <Footer />
         </div>
     );
 };

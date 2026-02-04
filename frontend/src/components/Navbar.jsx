@@ -22,6 +22,8 @@ const Navbar = ({ toggleSidebar }) => {
                 <div className="hidden md:flex items-center gap-8">
                     <Link to="/" className="text-sm font-medium text-white/70 hover:text-white transition-colors">Home</Link>
                     <Link to="/features" className="text-sm font-medium text-white/70 hover:text-white transition-colors">Features</Link>
+                    <Link to="/how-it-works" className="text-sm font-medium text-white/70 hover:text-white transition-colors">How it Works</Link>
+                    <Link to="/about" className="text-sm font-medium text-white/70 hover:text-white transition-colors">About Us</Link>
                     <Link to="/login" className="px-4 py-2 text-sm font-medium text-white hover:text-white/90 bg-white/10 hover:bg-white/20 rounded-lg transition-all">Login</Link>
                     <Link to="/register" className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-lg shadow-emerald-500/20 transition-all">Get Started</Link>
                 </div>

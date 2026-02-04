@@ -6,11 +6,15 @@ PhishGuard Pro is a premium, production-ready phishing detection system featurin
 
 ## 🚀 Key Features
 
-### � Live "Cyber Emerald" Dashboard
+### 💎 NEW: Premium UI Overhaul
+- **Split Layout Auth**: Side-by-side Layout for Login/Register with animated branding and responsive mobile stacking.
+- **Glassmorphism Dashboard**: Fully redesigned Dashboard with "Cyber Emerald" glow effects, hero welcome section, and glass-panel stat cards.
+- **Responsive Sidebar**: Collapsible navigation with mobile toggle support.
+
+### 📊 Live "Cyber Emerald" Dashboard
 - **Dynamic Monitoring**: Real-time stats for Total Scans, Phishing Detections, and Legitimate hits.
 - **7-Day Analysis Feed**: Visual bar charts tracking scan activity over the past week.
 - **Auto-Syncing Registry**: A live-updating list (every 10 seconds) of the most recent analysis results.
-- **Premium UI**: Glassmorphism design with emerald/mint gradients and fluid **Framer Motion** animations.
 
 ### 🛡️ Analysis Engine
 - **Direct Email Analysis**: Streamlined "Paste-and-Check" flow for immediate phishing classification.
@@ -20,17 +24,17 @@ PhishGuard Pro is a premium, production-ready phishing detection system featurin
 
 ### ⚙️ Backend & Resilience
 - **FastAPI Core**: High-performance, asynchronous REST API.
-- **MongoDB Cloud**: Integrated with MongoDB Atlas for persistent scan history and statistical aggregation.
-- **Security First**: Enforced timeouts and robust error handling for dead links or network failures.
+- **MongoDB Support**: Integrated with MongoDB (Local or Atlas) for persistent scan history.
+- **Secure Configuration**: Environment variable support via `.env`.
 
 ---
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 19, Vite, Tailwind CSS, Framer Motion, Axios, **Recharts** (Visualizations).
-- **Backend**: Python 3.11+, FastAPI, Uvicorn, Pymongo.
+- **Backend**: Python 3.11+, FastAPI, Uvicorn, Pymongo, Python-Dotenv.
 - **Data/ML**: Scikit-learn, joblib, BeautifulSoup4, TLDextract.
-- **Database**: MongoDB Atlas.
+- **Database**: MongoDB.
 
 ---
 
@@ -40,16 +44,17 @@ PhishGuard Pro is a premium, production-ready phishing detection system featurin
 phishing-detector/
 ├── frontend/               # React 19 Application
 │   ├── src/
-│   │   ├── components/     # StatCards, Charts, ResultCards
-│   │   ├── pages/          # DashboardHome, Email/URL Analysis
+│   │   ├── components/     # StatCards, Sidebar, ResultCards
+│   │   ├── layouts/        # DashboardLayout (Sidebar + Mobile Toggle)
+│   │   ├── pages/          # DashboardHome, Login, Register, Analysis
 │   │   └── utils/          # Live API services (Axios)
 │   └── ...
 ├── src/                    # Backend Source
 │   ├── api_fastapi.py      # Dashboard Stats API & Routing
 │   ├── analysis_engine.py  # Hybrid Detection Logic
-│   ├── feature_url.py      # URL Heuristics
-│   └── feature_email.py    # Email Signal Processing
+│   └── ...
 ├── model/                  # Pretrained ML Models (.pkl)
+├── .env                    # Environment Variables
 ├── requirements.txt        # Python Dependencies
 └── README.md
 ```
@@ -66,6 +71,10 @@ cd Phishing-Url-and-Spam-Email-Detection-
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Configure Environment
+# Create a .env file in the root directory:
+# MONGO_URI=mongodb://localhost:27017/  <-- Or your Cloud URI
 
 # Start the API (Port 5000)
 python -m uvicorn src.api_fastapi:app --reload --port 5000
@@ -102,7 +111,7 @@ npm run dev
 
 ---
 
-## � Author
+## 👤 Author
 **road2tec**  
 Project Repository: [Phishing-Url-and-Spam-Email-Detection-](https://github.com/road2tec/Phishing-Url-and-Spam-Email-Detection-.git)
 

@@ -46,63 +46,88 @@ def extract_suspicious_snippets(html):
         
     return "\n".join(snippets) if snippets else "No suspicious HTML elements found."
 
+from .feature_url import extract_url_features
+from .feature_html import extract_html_features
+import joblib
+import os
+
+# Load URL ML model if available (fallback to heuristics if not)
+ML_MODEL_PATH = "model/rf_model.pkl"
+ml_model = None
+if os.path.exists(ML_MODEL_PATH):
+    try:
+        ml_model = joblib.load(ML_MODEL_PATH)
+    except:
+        pass
+
 def analyze_phishing(url, html):
     """
-    Analyzes URL and HTML for phishing indicators.
-    Returns: Prediction, Risk Score (0-100), Reasons
+    Analyzes URL and HTML for phishing indicators using a Unified Risk Score.
+    Combines: ML Model + Heuristic Rules + Live HTML Analysis.
     """
-    score = 0
+    heuristic_score = 0
+    html_score = 0
+    ml_score = 0
     reasons = []
     
-    # --- URL Analysis ---
+    # --- 1. Heuristic URL Analysis ---
     parsed_url = urlparse(url)
-    
-    # 1. Insecure HTTP
     if parsed_url.scheme == "http":
-        score += 20
-        reasons.append("Insecure HTTP protocol used.")
+        heuristic_score += 30
+        reasons.append("Insecure HTTP protocol used (no encryption).")
         
-    # 2. Suspicious URL characters (@, -, many dots)
     if "@" in url:
-        score += 25
-        reasons.append("URL contains '@' symbol (often used to mask real domain).")
+        heuristic_score += 40
+        reasons.append("URL contains '@' symbol (highly suspicious masking technique).")
+    
     if url.count("-") > 3:
-        score += 10
-        reasons.append("High number of hyphens in URL.")
-    
-    # --- HTML Analysis ---
-    # Safe check: only proceed if HTML was successfully fetched
-    if html and not html.startswith("Error") and "Unable to fetch" not in html:
-        soup = BeautifulSoup(html, "html.parser")
+        heuristic_score += 15
+        reasons.append("Excessive hyphens in URL, typical of phishing domains.")
         
-        # 3. Presence of password/login fields
-        pw_fields = soup.find_all("input", {"type": "password"})
-        if pw_fields:
-            score += 30
-            reasons.append(f"Found {len(pw_fields)} password input field(s).")
-            
-        # 4. Suspicious form action links (IP address or external domain)
-        forms = soup.find_all("form")
-        for form in forms:
-            action = form.get("action", "")
-            if action:
-                if re.search(r"\d+\.\d+\.\d+\.\d+", action):
-                    score += 25
-                    reasons.append("Form action points to an IP address.")
-                
-                # Check if form submits to a different domain
-                ext_url = tldextract.extract(url)
-                ext_action = tldextract.extract(action) if action.startswith("http") else None
-                if ext_action and ext_action.domain != ext_url.domain:
-                    score += 20
-                    reasons.append(f"Form action points to an external domain: {ext_action.domain}")
+    if re.search(r"\d+\.\d+\.\d+\.\d+", parsed_url.netloc):
+        heuristic_score += 50
+        reasons.append("URL uses an IP address instead of a domain name.")
 
-    # Cap score at 100
-    score = min(score, 100)
+    # --- 2. Live HTML Analysis ---
+    html_data = extract_html_features(html)
+    html_reasons = html_data.get("reasons", [])
+    reasons.extend(html_reasons)
     
-    prediction = "Phishing" if score >= 50 else "Legitimate"
+    # Calculate HTML score based on reasons
+    if html_reasons:
+        html_score = min(len(html_reasons) * 20, 100)
+        # Extra weight for password fields
+        if any("password" in r.lower() for r in html_reasons):
+            html_score = max(html_score, 85)
+
+    # --- 3. Machine Learning Score (If Model is Available) ---
+    if ml_model:
+        try:
+            url_feats = extract_url_features(url)
+            # Convert feats dict to match model input (this is a placeholder, adjust to actual model features)
+            # For now, we'll simulate the ML finding if it's very suspicious
+            prediction = ml_model.predict([list(url_feats.values())])[0]
+            ml_score = 90 if prediction == 1 else 10
+        except:
+            ml_score = 0
+    else:
+        # Fallback: simple rule-based "ML" score
+        ml_score = heuristic_score
+
+    # --- 4. Unified Risk Score Calculation ---
+    # CONFIGURATION: Adjust weights here to tune detection sensitivity
+    # Current: Heuristic (30%) + HTML (40%) + ML (30%)
+    w_heuristic = 0.3
+    w_html = 0.4
+    w_ml = 0.3
     
-    return prediction, score, reasons
+    final_score = (heuristic_score * w_heuristic) + (html_score * w_html) + (ml_score * w_ml)
+    final_score = min(int(final_score), 100)
+    
+    prediction = "Phishing" if final_score >= 80 else "Legitimate"
+    
+    # Unified Data Flow: URL → HTML Fetch → Analysis → Risk Score → Blocklist (stored in API)
+    return prediction, final_score, list(set(reasons))
 
 def extract_email_signals(text):
     """Extracts suspicious signals from email content."""

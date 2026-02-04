@@ -9,10 +9,20 @@ import joblib
 from urllib.parse import urlparse
 from datetime import datetime
 from pymongo import MongoClient
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from .analysis_engine import (
     fetch_live_html, extract_suspicious_snippets, analyze_phishing,
     extract_email_signals, analyze_email_phishing
 )
+from .feature_url import extract_url_features
+import shap
+import lime
+import lime.lime_tabular
+import warnings
+warnings.filterwarnings("ignore")
 
 app = FastAPI()
 
@@ -26,15 +36,20 @@ app.add_middleware(
 )
 
 # --- MongoDB Configuration ---
-MONGO_URI = "mongodb+srv://punamproject:punamproject%40123@road2tech.vajimqu.mongodb.net/?appName=road2tech"
+# MONGO_URI = "mongodb+srv://punamproject:punamproject%40123@road2tech.vajimqu.mongodb.net/?appName=road2tech"
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 try:
     client = MongoClient(MONGO_URI)
     db = client['phishing_detector']
     history_collection = db['scan_history']
+    blocklist_collection = db['blocklist']  # New collection for auto-blocking
     print("Connected to MongoDB successfully!")
 except Exception as e:
     print(f"Error connecting to MongoDB: {e}")
     history_collection = None
+    blocklist_collection = None
+
+# DATA FLOW: URL → HTML Fetch → Analysis → Unified Risk Score → Auto Blocklist → Extension Enforcement
 
 def log_to_db(type, input, prediction, score, reasons):
     if history_collection is not None:
@@ -63,12 +78,49 @@ class EmailRequest(BaseModel):
 
 # Load URL Random Forest model (Rule-based features)
 model_path = "model/rf_model.pkl"
-if not os.path.exists(model_path):
+background_path = "model/background_data.pkl"
+model = None
+explainer_shap = None
+explainer_lime = None
+background_data = None
+
+if os.path.exists(model_path):
+    try:
+        with open(model_path, "rb") as f:
+            model = pickle.load(f)
+        print(f"ML Model loaded from {model_path}")
+        
+        # Load background data for LIME/SHAP
+        if os.path.exists(background_path):
+            with open(background_path, "rb") as f:
+                background_data = pickle.load(f)
+            
+            # Initialize explainers
+            # SHAP
+            explainer_shap = shap.TreeExplainer(model)
+            
+            # LIME
+            feature_names = ["url_length", "domain_length", "dot_count", "digit_count", "has_ip", "is_https", "susp_keywords"]
+            # Convert background data to numpy for LIME
+            if hasattr(background_data, 'values'):
+                bg_values = background_data.values
+            else:
+                bg_values = background_data
+                
+            explainer_lime = lime.lime_tabular.LimeTabularExplainer(
+                bg_values,
+                mode='classification',
+                feature_names=feature_names,
+                class_names=['Legitimate', 'Phishing'],
+                discretize_continuous=True
+            )
+            print("Explainable AI engines (SHAP/LIME) initialized.")
+    except Exception as e:
+        print(f"Failed to load ML artifacts: {e}")
+        model = None
+else:
     print(f"Warning: URL model not found at {model_path}")
     model = None
-else:
-    with open(model_path, "rb") as f:
-        model = pickle.load(f)
 
 # Load Pretrained Email ML Model
 email_model_path = "model/phishing_detector.pkl"
@@ -304,17 +356,164 @@ def api_extract_url_signals(data: PredictionRequest):
 
 @app.post("/api/analyze-url")
 def api_analyze_url(data: PredictionRequest):
+    """
+    Main Analysis Flow:
+    1. Fetch HTML
+    2. Analyze for phishing (ML + Rules + HTML)
+    3. If risk >= 80, automatically add to blocklist
+    4. Store in scan history
+    """
     html = data.html
     if not html and data.url:
         html = fetch_live_html(data.url)
     
     prediction, score, reasons = analyze_phishing(data.url, html)
-    log_to_db("url_analysis", data.url, prediction, score, reasons)
+    
+    
+    # --- ML Integration & Explainability ---
+    ml_prediction = "Unknown"
+    ml_confidence = 0.0
+    explanation = {"top_features": []}
+    
+    if model:
+        try:
+            # Extract features for ML
+            feats = extract_url_features(data.url)
+            # Ensure order matches training
+            feature_order = ["url_length", "domain_length", "dot_count", "digit_count", "has_ip", "is_https", "susp_keywords"]
+            input_vector = [feats[f] for f in feature_order]
+            input_df = pd.DataFrame([input_vector], columns=feature_order)
+            
+            # Predict
+            pred_class = model.predict(input_df)[0] # 0 or 1
+            ml_prediction = "phishing" if pred_class == 1 else "legitimate"
+            
+            # Confidence
+            probs = model.predict_proba(input_df)[0]
+            ml_confidence = float(probs[1]) if pred_class == 1 else float(probs[0])
+            
+            # Explainability (SHAP)
+            if explainer_shap:
+                shap_values = explainer_shap.shap_values(input_df)
+                
+                # Robust handling of SHAP output shapes
+                # Case 1: List of arrays [class0, class1]
+                if isinstance(shap_values, list):
+                    sv = shap_values[1][0] # Class 1 (Phishing), Sample 0
+                
+                # Case 2: 3D Array (samples, features, classes) -> (1, 7, 2)
+                elif len(np.array(shap_values).shape) == 3:
+                    sv = np.array(shap_values)[0, :, 1] # Sample 0, All Feats, Class 1
+                    
+                # Case 3: 2D Array (samples, features) -> (1, 7)
+                else:
+                    sv = np.array(shap_values)[0]
+
+                # Get top features
+                feature_importance = zip(feature_order, sv)
+                sorted_features = sorted(feature_importance, key=lambda x: abs(x[1]), reverse=True)
+                
+                top_features = []
+                for name, val in sorted_features[:3]:
+                    impact = "Increases Risk" if val > 0 else "Decreases Risk"
+                    top_features.append(f"{name} ({impact})")
+                
+                explanation["top_features"] = top_features
+                
+        except Exception as e:
+            print(f"ML/Explainability Error: {e}")
+    
+    # Decision: Use ML prediction if available and high confidence, otherwise fallback to heuristics
+    # The user rule: "Blocking must happen only when phishing is detected"
+    
+    # Overwrite unified score if ML is confident
+    final_prediction = prediction
+    final_score = score
+    
+    if ml_prediction == "phishing" and ml_confidence > 0.6:
+        final_prediction = "Phishing"
+        final_score = max(score, int(ml_confidence * 100))
+        reasons.append(f"ML Model detected phishing patterns (Confidence: {ml_confidence:.2f})")
+    
+    # Auto-block logic using updated score
+    should_block = final_score >= 80
+
+    # --- Auto Blocklist System ---
+    if should_block and blocklist_collection is not None:
+        try:
+            # Avoid duplicate URLs
+            if not blocklist_collection.find_one({"url": data.url}):
+                blocklist_collection.insert_one({
+                    "url": data.url,
+                    "risk_score": final_score,
+                    "reasons": reasons,
+                    "timestamp": datetime.utcnow()
+                })
+        except Exception as e:
+            print(f"Failed to auto-block URL: {e}")
+
+    log_to_db("url_analysis", data.url, final_prediction, final_score, reasons)
+    
     return {
-        "prediction": prediction,
-        "risk_score": score,
-        "reasons": reasons
+        "url": data.url,
+        "prediction": final_prediction.lower(), # phishing | legitimate
+        "confidence": ml_confidence if ml_prediction != "Unknown" else (final_score / 100.0), # 0.xx
+        "block": should_block,
+        "explanation": explanation,
+        # Backward Compatibility fields
+        "risk_score": final_score,
+        "reasons": reasons,
+        "auto_blocked": should_block
     }
+
+# --- Real-Time Block Enforcement (Extension) ---
+@app.get("/api/check-blocked-url")
+def check_blocked_url(url: str):
+    """
+    Check if a URL is in the blocklist.
+    Used by the browser extension for real-time enforcement.
+    """
+    if blocklist_collection is not None:
+        found = blocklist_collection.find_one({"url": url})
+        if found:
+            return {
+                "blocked": True,
+                "risk_score": found.get("risk_score", 100),
+                "reasons": found.get("reasons", ["Previously flagged as phishing"])
+            }
+    return {"blocked": False}
+
+# --- Blocklist Management (Dashboard) ---
+@app.get("/api/blocklist")
+def get_blocklist():
+    if blocklist_collection is None:
+        return []
+    try:
+        blocks = list(blocklist_collection.find().sort("timestamp", -1))
+        for b in blocks:
+            b["_id"] = str(b["_id"])
+            if "timestamp" in b:
+                b["timestamp"] = b["timestamp"].isoformat()
+        return blocks
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.delete("/api/blocklist")
+def remove_from_blocklist(url: str):
+    if blocklist_collection is not None:
+        result = blocklist_collection.delete_one({"url": url})
+        return {"success": result.deleted_count > 0}
+    return {"error": "Database unavailable"}
+
+@app.post("/api/mark-safe")
+def mark_url_safe(url: str):
+    """Admin override to mark a URL as safe by removing it from blocklist."""
+    if blocklist_collection is not None:
+        blocklist_collection.delete_one({"url": url})
+        # Optionally log as mark-safe in scan history
+        log_to_db("admin_override", url, "Legitimate", 0, ["Marked safe by administrator"])
+        return {"success": True}
+    return {"error": "Database unavailable"}
 
 @app.post("/api/extract-email-signals")
 def api_extract_email_signals(data: EmailRequest):

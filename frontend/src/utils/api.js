@@ -17,4 +17,9 @@ export const extractEmailSignals = (email_text) => api.post('/api/extract-email-
 export const analyzeEmail = (email_text) => api.post('/api/analyze-email', { email_text });
 export const fetchDashboardStats = () => api.get('/api/dashboard-stats');
 
+// Blocklist Management
+export const fetchBlocklist = () => api.get('/api/blocklist');
+export const markUrlSafe = (url) => api.post(`/api/mark-safe?url=${encodeURIComponent(url)}`);
+export const removeFromBlocklist = (url) => api.delete(`/api/blocklist?url=${encodeURIComponent(url)}`);
+
 export default api;

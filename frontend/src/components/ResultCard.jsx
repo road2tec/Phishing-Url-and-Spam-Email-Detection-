@@ -2,8 +2,9 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert, AlertTriangle, ListChecks } from 'lucide-react';
 
-const ResultCard = ({ prediction, score, reasons }) => {
+const ResultCard = ({ prediction, score, risk_score, reasons, explanation }) => {
     const isPhishing = prediction?.toLowerCase() === 'phishing';
+    const displayScore = risk_score !== undefined ? risk_score : score;
 
     return (
         <motion.div
@@ -37,12 +38,12 @@ const ResultCard = ({ prediction, score, reasons }) => {
                                 <AlertTriangle className={`w-5 h-5 ${isPhishing ? 'text-red-400' : 'text-emerald-400'}`} />
                                 Risk Assessment Score
                             </h4>
-                            <span className={`text-2xl font-black ${isPhishing ? 'text-red-400' : 'text-emerald-400'}`}>{score}/100</span>
+                            <span className={`text-2xl font-black ${isPhishing ? 'text-red-400' : 'text-emerald-400'}`}>{displayScore}/100</span>
                         </div>
                         <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden">
                             <motion.div
                                 initial={{ width: 0 }}
-                                animate={{ width: `${score}%` }}
+                                animate={{ width: `${displayScore}%` }}
                                 transition={{ duration: 1, ease: 'easeOut' }}
                                 className={`h-full ${isPhishing ? 'bg-gradient-to-r from-red-600 to-red-400' : 'bg-gradient-to-r from-emerald-600 to-emerald-400'}`}
                             />
@@ -72,6 +73,31 @@ const ResultCard = ({ prediction, score, reasons }) => {
                             )}
                         </div>
                     </div>
+
+                    {/* Check if explanation prop exists exists, otherwise generic fallback */}
+                    {explanation && explanation.top_features ? (
+                        <div>
+                            <h4 className="text-white/70 text-sm font-bold flex items-center gap-2 mb-4 uppercase tracking-widest mt-8 border-t border-white/10 pt-6">
+                                <ListChecks className="w-4 h-4 text-cyber-accent" />
+                                AI Efficiency Analysis (XAI)
+                            </h4>
+                            <div className="p-5 bg-white/5 border border-white/10 rounded-2xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-20 h-20 bg-cyber-accent/10 blur-xl rounded-full pointer-events-none"></div>
+                                <p className="text-xs text-white/60 mb-4 leading-relaxed font-medium">
+                                    Our ML model (Random Forest) analyzed strict lexical features.
+                                    <br />Here is <span className="text-white font-bold">why</span> it made this decision (SHAP/LIME):
+                                </p>
+                                <div className="space-y-3">
+                                    {explanation.top_features.map((feat, i) => (
+                                        <div key={i} className="flex items-center justify-between text-xs text-emerald-300 bg-black/20 p-2 rounded-lg border border-white/5">
+                                            <span className="font-mono tracking-wide">{feat}</span>
+                                            <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded font-bold uppercase">Factor {i + 1}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    ) : null}
                 </div>
             </div>
         </motion.div>
