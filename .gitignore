@@ -19,11 +19,11 @@ data/
 *.csv
 *.txt
 
-# Model files (large)
-models/
-*.h5
-*.pkl
-*.joblib
+# Model files (Small enough for GitHub)
+# models/
+# *.h5
+# *.pkl
+# *.joblib
 
 # IDE
 .vscode/
