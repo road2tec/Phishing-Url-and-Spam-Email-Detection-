@@ -85,12 +85,14 @@ const Home = () => {
                         desc="Fetch live HTML source code and analyze suspicious tags in real-time."
                         delay={0.1}
                     />
-                    <FeatureCard
-                        icon={Lock}
-                        title="Email Scanning"
-                        desc="Identify phishing patterns, urgent triggers, and sensitive data requests."
-                        delay={0.2}
-                    />
+                    {import.meta.env.VITE_ENABLE_EMAIL_ANALYSIS !== 'false' && (
+                        <FeatureCard
+                            icon={Lock}
+                            title="Email Scanning"
+                            desc="Identify phishing patterns, urgent triggers, and sensitive data requests."
+                            delay={0.2}
+                        />
+                    )}
                     <FeatureCard
                         icon={AlertTriangle}
                         title="Explainable Results"

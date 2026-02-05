@@ -13,6 +13,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Feature Flags
+ENABLE_EMAIL_ANALYSIS = os.getenv("ENABLE_EMAIL_ANALYSIS", "true").lower() == "true"
+
 from .analysis_engine import (
     fetch_live_html, extract_suspicious_snippets, analyze_phishing,
     extract_email_signals, analyze_email_phishing
@@ -299,7 +302,13 @@ def analyze_html_content(html):
 
 @app.get("/")
 def root():
-    return {"status": "API is running", "model_loaded": model is not None}
+    return {
+        "status": "API is running", 
+        "model_loaded": model is not None,
+        "features": {
+            "email_analysis": ENABLE_EMAIL_ANALYSIS
+        }
+    }
 
 @app.post("/predict")
 def predict(data: PredictionRequest):
@@ -517,11 +526,15 @@ def mark_url_safe(url: str):
 
 @app.post("/api/extract-email-signals")
 def api_extract_email_signals(data: EmailRequest):
+    if not ENABLE_EMAIL_ANALYSIS:
+        raise HTTPException(status_code=403, detail="Email analysis feature is disabled")
     signals = extract_email_signals(data.email_text)
     return {"signals": signals}
 
 @app.post("/api/analyze-email")
 def api_analyze_email(data: EmailRequest):
+    if not ENABLE_EMAIL_ANALYSIS:
+        raise HTTPException(status_code=403, detail="Email analysis feature is disabled")
     # Pass the loaded ML model for more accurate detection
     prediction, score, reasons = analyze_email_phishing(data.email_text, ml_model=email_ml_model)
     log_to_db("email_analysis", data.email_text[:500], prediction, score, reasons)

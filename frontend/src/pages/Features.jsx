@@ -59,7 +59,10 @@ const Features = () => {
             desc: "Deep inspection of <form> actions, <script> sources, and hidden input fields that indicate data exfiltration attempts.",
             color: "emerald"
         }
-    ];
+    ].filter(f => {
+        if (import.meta.env.VITE_ENABLE_EMAIL_ANALYSIS === 'false' && f.title === "Email Signal Extraction") return false;
+        return true;
+    });
 
     return (
         <div className="min-h-screen bg-cyber-dark relative overflow-hidden">

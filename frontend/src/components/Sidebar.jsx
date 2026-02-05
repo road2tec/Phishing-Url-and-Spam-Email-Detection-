@@ -18,10 +18,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         navigate('/');
     };
 
+    const enableEmailAnalysis = import.meta.env.VITE_ENABLE_EMAIL_ANALYSIS !== 'false';
+
     const navItems = [
         { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
         { name: 'URL Analysis', icon: LinkIcon, path: '/dashboard/url' },
-        { name: 'Email Analysis', icon: Mail, path: '/dashboard/email' },
+        ...(enableEmailAnalysis ? [{ name: 'Email Analysis', icon: Mail, path: '/dashboard/email' }] : []),
         { name: 'Blocked Registry', icon: ShieldAlert, path: '/dashboard/blocked' },
     ];
 

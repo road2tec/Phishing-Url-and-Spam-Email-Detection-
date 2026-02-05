@@ -59,18 +59,6 @@ const AboutUs = () => {
                     </motion.div>
                 </div>
 
-                {/* Team Section */}
-                <div className="text-center mb-24">
-                    <h2 className="text-3xl font-bold text-white mb-16">The Core Team</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-                        <TeamMember name="Alex Chen" role="Lead Architect" />
-                        <TeamMember name="Sarah Jones" role="ML Engineer" />
-                        <TeamMember name="David Kim" role="Frontend Lead" />
-                        <TeamMember name="Maria Garcia" role="Threat Intel" />
-                        <TeamMember name="James Wilson" role="DevOps" />
-                        <TeamMember name="Your Name" role="Project Lead" />
-                    </div>
-                </div>
 
                 {/* Back to Home */}
                 <div className="text-center">
@@ -86,17 +74,5 @@ const AboutUs = () => {
     );
 };
 
-const TeamMember = ({ name, role }) => (
-    <motion.div
-        whileHover={{ y: -5 }}
-        className="p-6 bg-white/5 rounded-2xl border border-white/5 group"
-    >
-        <div className="w-24 h-24 mx-auto bg-gradient-to-br from-emerald-500/20 to-blue-500/20 rounded-full mb-4 flex items-center justify-center">
-            <Users className="w-10 h-10 text-white/50 group-hover:text-white transition-colors" />
-        </div>
-        <h3 className="text-xl font-bold text-white mb-1">{name}</h3>
-        <p className="text-emerald-400 text-sm font-medium">{role}</p>
-    </motion.div>
-);
 
 export default AboutUs;
