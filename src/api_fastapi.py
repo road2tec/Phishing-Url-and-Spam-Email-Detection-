@@ -27,6 +27,9 @@ import lime.lime_tabular
 import warnings
 warnings.filterwarnings("ignore")
 
+from instagram_model.predict_instagram import InstagramPredictor
+from instagram_model.data_fetcher import get_instagram_profile_data
+
 app = FastAPI()
 
 # Enable CORS for browser extension
@@ -42,29 +45,36 @@ app.add_middleware(
 # MONGO_URI = "mongodb+srv://punamproject:punamproject%40123@road2tech.vajimqu.mongodb.net/?appName=road2tech"
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 try:
-    client = MongoClient(MONGO_URI)
-    db = client['phishing_detector']
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=2000)
+    # Force a connection check
+    client.admin.command('ping')
+    # Use the database name from URI if provided, else fallback to 'phishing_detector'
+    db = client.get_database() if client.get_database().name != 'test' else client['phishing_detector']
     history_collection = db['scan_history']
-    blocklist_collection = db['blocklist']  # New collection for auto-blocking
+    blocklist_collection = db['blocklist']
     print("Connected to MongoDB successfully!")
 except Exception as e:
-    print(f"Error connecting to MongoDB: {e}")
+    print(f"CRITICAL: MongoDB is NOT running at {MONGO_URI}. Please start MongoDB service.")
     history_collection = None
     blocklist_collection = None
 
 # DATA FLOW: URL → HTML Fetch → Analysis → Unified Risk Score → Auto Blocklist → Extension Enforcement
 
-def log_to_db(type, input, prediction, score, reasons):
+def log_to_db(type, input, prediction, score, reasons, user_id=None):
     if history_collection is not None:
         try:
-            history_collection.insert_one({
+            doc = {
                 "type": type,
                 "input": input,
                 "prediction": prediction,
                 "risk_score": score,
                 "reasons": reasons,
                 "timestamp": datetime.utcnow()
-            })
+            }
+            if user_id:
+                doc["user_id"] = user_id
+                
+            history_collection.insert_one(doc)
         except Exception as e:
             print(f"Failed to log to MongoDB: {e}")
 
@@ -72,12 +82,18 @@ class PredictionRequest(BaseModel):
     url: str
     email_text: str = ""
     html: str = ""
+    user_id: str = None
 
 class URLRequest(BaseModel):
     url: str
 
 class EmailRequest(BaseModel):
     email_text: str
+    user_id: str = None
+
+class InstagramRequest(BaseModel):
+    username: str
+    user_id: str = None
 
 # Load URL Random Forest model (Rule-based features)
 model_path = "model/rf_model.pkl"
@@ -129,14 +145,23 @@ else:
 email_model_path = "model/phishing_detector.pkl"
 try:
     if os.path.exists(email_model_path):
-        email_ml_model = joblib.load(email_model_path)
+        with open(email_model_path, "rb") as f:
+            email_ml_model = pickle.load(f)
         print(f"Pretrained Email ML Model loaded successfully from {email_model_path}!")
     else:
         print(f"Warning: Email ML model not found at {email_model_path}")
         email_ml_model = None
 except Exception as e:
     print(f"Warning: Could not load pretrained email model from {email_model_path}: {e}")
-    email_ml_model = None
+    # Fallback to joblib if pickle fails (compatibility)
+    try:
+        email_ml_model = joblib.load(email_model_path)
+        print("Loaded with joblib fallback.")
+    except:
+        email_ml_model = None
+
+# Initialize Instagram Model
+insta_predictor = InstagramPredictor()
 
 def simple_url_features(url):
     """Enhanced phishing detection using multiple heuristics"""
@@ -461,7 +486,7 @@ def api_analyze_url(data: PredictionRequest):
         except Exception as e:
             print(f"Failed to auto-block URL: {e}")
 
-    log_to_db("url_analysis", data.url, final_prediction, final_score, reasons)
+    log_to_db("url_analysis", data.url, final_prediction, final_score, reasons, user_id=data.user_id)
     
     return {
         "url": data.url,
@@ -537,7 +562,7 @@ def api_analyze_email(data: EmailRequest):
         raise HTTPException(status_code=403, detail="Email analysis feature is disabled")
     # Pass the loaded ML model for more accurate detection
     prediction, score, reasons = analyze_email_phishing(data.email_text, ml_model=email_ml_model)
-    log_to_db("email_analysis", data.email_text[:500], prediction, score, reasons)
+    log_to_db("email_analysis", data.email_text[:500], prediction, score, reasons, user_id=data.user_id)
     return {
         "prediction": prediction,
         "risk_score": score,
@@ -545,7 +570,7 @@ def api_analyze_email(data: EmailRequest):
     }
 
 @app.get("/api/dashboard-stats")
-def get_dashboard_stats():
+def get_dashboard_stats(user_id: str = None):
     if history_collection is None:
         return {
             "total_scans": 0,
@@ -560,17 +585,37 @@ def get_dashboard_stats():
     try:
         from datetime import timedelta
         
-        total_scans = history_collection.count_documents({})
-        phishing_count = history_collection.count_documents({"prediction": "Phishing"})
-        legitimate_count = history_collection.count_documents({"prediction": "Legitimate"})
+        # Build filter query
+        query = {}
+        if user_id:
+            query["user_id"] = user_id
+
+        total_scans = history_collection.count_documents(query)
         
-        email_scans = history_collection.count_documents({"type": "email_analysis"})
-        url_scans = history_collection.count_documents({"type": "url_analysis"})
+        phishing_query = query.copy()
+        phishing_query["prediction"] = "Phishing"
+        phishing_count = history_collection.count_documents(phishing_query)
+        
+        legit_query = query.copy()
+        legit_query["prediction"] = "Legitimate"
+        legitimate_count = history_collection.count_documents(legit_query)
+        
+        email_query = query.copy()
+        email_query["type"] = "email_analysis"
+        email_scans = history_collection.count_documents(email_query)
+        
+        url_query = query.copy()
+        url_query["type"] = "url_analysis"
+        url_scans = history_collection.count_documents(url_query)
         
         # Get 7-day activity aggregation
         seven_days_ago = datetime.utcnow() - timedelta(days=7)
+        match_stage = {"timestamp": {"$gte": seven_days_ago}}
+        if user_id:
+            match_stage["user_id"] = user_id
+            
         pipeline = [
-            {"$match": {"timestamp": {"$gte": seven_days_ago}}},
+            {"$match": match_stage},
             {"$group": {
                 "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$timestamp"}},
                 "count": {"$sum": 1}
@@ -588,7 +633,7 @@ def get_dashboard_stats():
             formatted_activity.append({"day": day_name, "date": date, "count": count})
 
         # Get last 10 scans
-        recent_scans_cursor = history_collection.find().sort("timestamp", -1).limit(10)
+        recent_scans_cursor = history_collection.find(query).sort("timestamp", -1).limit(10)
         recent_scans = []
         for scan in recent_scans_cursor:
             scan["_id"] = str(scan["_id"])  # Convert ObjectId to string
@@ -608,3 +653,38 @@ def get_dashboard_stats():
     except Exception as e:
         print(f"Error fetching stats: {e}")
         return {"error": str(e)}
+
+@app.post("/api/analyze-instagram-profile")
+def analyze_instagram_profile(data: InstagramRequest):
+    """
+    Analyzes an Instagram profile for phishing indicators.
+    1. Fetches public metadata (mocked for demo).
+    2. Runs Random Forest model.
+    3. Returns prediction and explanation.
+    """
+    username = data.username
+    
+    # 1. Fetch Data
+    features = get_instagram_profile_data(username)
+    
+    # 2. Predict
+    prediction, confidence, explanation = insta_predictor.predict(features)
+    
+    # 3. Decision Logic
+    should_block = False
+    if prediction == "phishing" and confidence >= 0.7:
+        should_block = True
+    
+    # Log to DB (optional, reusing history collection if needed)
+    if should_block:
+         log_to_db("instagram_phishing", username, "Phishing", int(confidence * 100), explanation.get("top_reasons", []), user_id=data.user_id)
+    
+    return {
+        "platform": "instagram",
+        "username": username,
+        "prediction": prediction,
+        "confidence": round(confidence, 2),
+        "block": should_block,
+        "explanation": explanation,
+        "features_analyzed": features # Returning features for transparency in demo
+    }

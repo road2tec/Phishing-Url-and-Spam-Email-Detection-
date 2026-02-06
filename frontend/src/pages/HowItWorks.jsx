@@ -38,7 +38,7 @@ const HowItWorks = () => {
                         transition={{ delay: 0.2 }}
                         className="text-white/60 max-w-2xl mx-auto text-lg"
                     >
-                        Our multi-layered defense engine combines real-time heuristic analysis with advanced machine learning to detect zero-day phishing attacks.
+                        Our multi-layered defense engine combines real-time heuristic analysis with advanced machine learning to detect zero-day phishing attacks across URLs, Emails, and Social Media.
                     </motion.p>
                 </div>
 

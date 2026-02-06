@@ -38,7 +38,7 @@ const DashboardHome = () => {
             const currentUser = JSON.parse(localStorage.getItem('phishguard_currentUser') || '{}');
             setUser(currentUser);
 
-            const res = await fetchDashboardStats();
+            const res = await fetchDashboardStats(currentUser.id);
             setStats(res.data);
             setError(null);
         } catch (err) {
@@ -333,7 +333,7 @@ const DashboardHome = () => {
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${scan.risk_score}%` }}
                                                     className={`h-full rounded-full ${scan.risk_score > 70 ? 'bg-red-500' :
-                                                            scan.risk_score > 40 ? 'bg-yellow-500' : 'bg-emerald-500'
+                                                        scan.risk_score > 40 ? 'bg-yellow-500' : 'bg-emerald-500'
                                                         }`}
                                                 />
                                             </div>
@@ -342,8 +342,8 @@ const DashboardHome = () => {
                                     </td>
                                     <td className="px-8 py-5 text-right">
                                         <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${scan.prediction === 'Phishing'
-                                                ? 'bg-red-500/10 border-red-500/20 text-red-400'
-                                                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                                            ? 'bg-red-500/10 border-red-500/20 text-red-400'
+                                            : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
                                             }`}>
                                             {scan.prediction === 'Phishing' ? <ShieldAlert className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
                                             {scan.prediction}

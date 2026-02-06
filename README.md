@@ -21,6 +21,7 @@ PhishGuard Pro is a premium, production-ready phishing detection system featurin
 - **URL Multi-Modal Scan**: Heuristic analysis of domain patterns, TLDs, and live HTML source code.
 - **Explainable Results**: Detailed risk scores (0-100%) with specific reasons for every detection.
 - **ML & Heuristics**: Hybrid approach using Random Forest models and custom behavioral rules.
+- **📸 [NEW] Instagram Profile Analysis**: Detects fake/phishing Instagram profiles using metadata analysis (Follower ratio, account age, suspicious bio links). Supported by **SHAP & LIME** for explainability.
 
 ### ⚙️ Backend & Resilience
 - **FastAPI Core**: High-performance, asynchronous REST API.
@@ -108,6 +109,11 @@ npm run dev
 ### 🔗 URL Guard
 - Analyze websites by URL.
 - The system fetches live HTML to inspect for hidden login forms and malicious redirection patterns.
+
+### 📸 Instagram Profile Scanner
+- Analyze an Instagram profile by username to check for bot/scammer indicators.
+- **API Endpoint**: `POST /api/analyze-instagram-profile`
+- **Explainability**: Returns top reasons for the decision (e.g., "Account is very new", "Suspicious link in bio").
 
 ---
 

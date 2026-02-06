@@ -6,8 +6,10 @@ import {
     Mail,
     ShieldAlert,
     LogOut,
+
     X,
-    Shield
+    Shield,
+    Instagram
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -23,6 +25,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     const navItems = [
         { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
         { name: 'URL Analysis', icon: LinkIcon, path: '/dashboard/url' },
+        { name: 'Instagram Analysis', icon: Instagram, path: '/dashboard/instagram' },
         ...(enableEmailAnalysis ? [{ name: 'Email Analysis', icon: Mail, path: '/dashboard/email' }] : []),
         { name: 'Blocked Registry', icon: ShieldAlert, path: '/dashboard/blocked' },
     ];

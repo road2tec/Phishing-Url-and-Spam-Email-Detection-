@@ -38,6 +38,7 @@ const Register = () => {
                 }
 
                 const newUser = {
+                    id: crypto.randomUUID(),
                     name: formData.name,
                     email: formData.email,
                     password: formData.password

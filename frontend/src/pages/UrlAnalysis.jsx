@@ -40,7 +40,8 @@ const UrlAnalysis = () => {
     const handleAnalyze = async () => {
         setLoading({ ...loading, analyze: true });
         try {
-            const res = await analyzeUrl(url, html);
+            const user = JSON.parse(localStorage.getItem('phishguard_currentUser') || '{}');
+            const res = await analyzeUrl(url, html, user.id);
             setResults(res.data);
         } catch (err) {
             setError('Analysis failed. Please try again.');

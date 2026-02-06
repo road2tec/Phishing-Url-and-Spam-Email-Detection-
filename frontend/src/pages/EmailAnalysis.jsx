@@ -20,7 +20,8 @@ const EmailAnalysis = () => {
         setResults(null);
 
         try {
-            const res = await analyzeEmail(emailText);
+            const user = JSON.parse(localStorage.getItem('phishguard_currentUser') || '{}');
+            const res = await analyzeEmail(emailText, user.id);
             setResults(res.data);
         } catch (err) {
             setError('Analysis failed. Please check your connection to the backend.');
