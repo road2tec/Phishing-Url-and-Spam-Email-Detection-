@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, Search, Code2, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
-import { fetchUrlHtml, extractUrlSignals, analyzeUrl } from '../utils/api';
+import { fetchUrlHtml, extractUrlSignals, analyzeUrl, fetchDomTree } from '../utils/api';
 import Loader from '../components/Loader';
 import ResultCard from '../components/ResultCard';
+import DomTreeView from '../components/DomTreeView';
 
 const UrlAnalysis = () => {
     const [url, setUrl] = useState('');
     const [html, setHtml] = useState('');
     const [snippets, setSnippets] = useState('');
+    const [domTree, setDomTree] = useState(null);
     const [results, setResults] = useState(null);
     const [loading, setLoading] = useState({ fetch: false, analyze: false });
     const [error, setError] = useState('');
     const [showCode, setShowCode] = useState(true);
+    const [showDom, setShowDom] = useState(false);
 
     const handleFetch = async (e) => {
         e.preventDefault();
@@ -22,6 +25,7 @@ const UrlAnalysis = () => {
         setError('');
         setHtml('');
         setSnippets('');
+        setDomTree(null);
         setResults(null);
 
         try {
@@ -30,6 +34,9 @@ const UrlAnalysis = () => {
 
             const signalsRes = await extractUrlSignals(url, res.data.html);
             setSnippets(signalsRes.data.snippets);
+
+            const domRes = await fetchDomTree(url, res.data.html);
+            setDomTree(domRes.data.dom_tree);
         } catch (err) {
             setError(err.response?.data?.detail || 'Failed to fetch URL content. Make sure the backend is running.');
         } finally {
@@ -144,6 +151,34 @@ const UrlAnalysis = () => {
                                 </motion.div>
                             )}
                         </div>
+
+                        {/* DOM Tree Section */}
+                        {domTree && (
+                            <div className="glass-morphism rounded-3xl border border-white/5 overflow-hidden">
+                                <button
+                                    onClick={() => setShowDom(!showDom)}
+                                    className="w-full p-6 flex items-center justify-between hover:bg-white/5 transition-colors"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 rounded-lg bg-cyber-accent/10">
+                                            <div className="w-5 h-5 border-2 border-cyber-accent rounded-sm" />
+                                        </div>
+                                        <h3 className="font-bold text-white">Live DOM Tree Structure</h3>
+                                    </div>
+                                    {showDom ? <ChevronUp className="text-white/30" /> : <ChevronDown className="text-white/30" />}
+                                </button>
+
+                                {showDom && (
+                                    <motion.div
+                                        initial={{ height: 0 }}
+                                        animate={{ height: 'auto' }}
+                                        className="px-6 pb-6"
+                                    >
+                                        <DomTreeView tree={domTree} />
+                                    </motion.div>
+                                )}
+                            </div>
+                        )}
 
                         {!results && (
                             <button

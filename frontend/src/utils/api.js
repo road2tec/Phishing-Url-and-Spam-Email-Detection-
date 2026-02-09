@@ -22,5 +22,6 @@ export const fetchDashboardStats = (user_id) => api.get('/api/dashboard-stats', 
 export const fetchBlocklist = () => api.get('/api/blocklist');
 export const markUrlSafe = (url) => api.post(`/api/mark-safe?url=${encodeURIComponent(url)}`);
 export const removeFromBlocklist = (url) => api.delete(`/api/blocklist?url=${encodeURIComponent(url)}`);
+export const fetchDomTree = (url, html) => api.post('/api/fetch-dom-tree', { url, html });
 
 export default api;

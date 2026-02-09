@@ -10,7 +10,6 @@ import DashboardLayout from './layouts/DashboardLayout';
 import DashboardHome from './pages/DashboardHome';
 import UrlAnalysis from './pages/UrlAnalysis';
 import EmailAnalysis from './pages/EmailAnalysis';
-import InstagramAnalysis from './pages/InstagramAnalysis';
 import BlockedUrls from './pages/BlockedUrls';
 
 function App() {
@@ -29,7 +28,6 @@ function App() {
         <Route index element={<DashboardHome />} />
         <Route path="url" element={<UrlAnalysis />} />
         <Route path="url" element={<UrlAnalysis />} />
-        <Route path="instagram" element={<InstagramAnalysis />} />
         {import.meta.env.VITE_ENABLE_EMAIL_ANALYSIS !== 'false' && (
           <Route path="email" element={<EmailAnalysis />} />
         )}

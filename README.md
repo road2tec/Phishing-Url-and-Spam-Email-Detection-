@@ -19,9 +19,11 @@ PhishGuard Pro is a premium, production-ready phishing detection system featurin
 ### 🛡️ Analysis Engine
 - **Direct Email Analysis**: Streamlined "Paste-and-Check" flow for immediate phishing classification.
 - **URL Multi-Modal Scan**: Heuristic analysis of domain patterns, TLDs, and live HTML source code.
-- **Explainable Results**: Detailed risk scores (0-100%) with specific reasons for every detection.
+- **Explainable Results (XAI)**: Detailed risk scores (0-100%) with **Live Factor Values** (e.g., actual Digit Count, URL Length) powered by SHAP & LIME.
+- **Live DOM Tree Hierarchy**: Interactive, hierarchical visualization of the website's structure to detect hidden elements.
 - **ML & Heuristics**: Hybrid approach using Random Forest models and custom behavioral rules.
-- **📸 [NEW] Instagram Profile Analysis**: Detects fake/phishing Instagram profiles using metadata analysis (Follower ratio, account age, suspicious bio links). Supported by **SHAP & LIME** for explainability.
+- **📸 [NEW] Instagram Profile Analysis**: Detects fake/phishing Instagram profiles using metadata analysis.
+- **🧩 Browser Extension**: Real-time enforcement that blocks malicious URLs before page load.
 
 ### ⚙️ Backend & Resilience
 - **FastAPI Core**: High-performance, asynchronous REST API.
@@ -45,11 +47,12 @@ PhishGuard Pro is a premium, production-ready phishing detection system featurin
 phishing-detector/
 ├── frontend/               # React 19 Application
 │   ├── src/
-│   │   ├── components/     # StatCards, Sidebar, ResultCards
+│   │   ├── components/     # StatCards, Sidebar, DomTreeView, ResultCards
 │   │   ├── layouts/        # DashboardLayout (Sidebar + Mobile Toggle)
-│   │   ├── pages/          # DashboardHome, Login, Register, Analysis
+│   │   ├── pages/          # DashboardHome, BlockedUrls, Login, Register, Analysis
 │   │   └── utils/          # Live API services (Axios)
 │   └── ...
+├── extension/              # Browser Extension (Real-time Blocking)
 ├── src/                    # Backend Source
 │   ├── api_fastapi.py      # Dashboard Stats API & Routing
 │   ├── analysis_engine.py  # Hybrid Detection Logic
@@ -108,7 +111,12 @@ npm run dev
 
 ### 🔗 URL Guard
 - Analyze websites by URL.
-- The system fetches live HTML to inspect for hidden login forms and malicious redirection patterns.
+- Inspect the **Live DOM Tree Structure** to find hidden malicious code.
+- View **XAI Factors** with actual counts (e.g., URL length, digit count) to understand why the AI flagged it.
+
+### 🛡️ Browser Extension
+- Real-time protection across the web.
+- Automatically blocks high-risk URLs registered in the system.
 
 ### 📸 Instagram Profile Scanner
 - Analyze an Instagram profile by username to check for bot/scammer indicators.

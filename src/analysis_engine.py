@@ -46,6 +46,36 @@ def extract_suspicious_snippets(html):
         
     return "\n".join(snippets) if snippets else "No suspicious HTML elements found."
 
+def extract_dom_tree(html):
+    """
+    Parses HTML and builds a JSON-serializable tree structure of the DOM.
+    """
+    if not html or html.startswith("Error") or "Unable to fetch" in html:
+        return {"name": "Error", "children": []}
+
+    soup = BeautifulSoup(html, "html.parser")
+    
+    def parse_element(element):
+        if element.name is None:
+            return None
+            
+        node = {
+            "name": element.name,
+            "attributes": {k: v for k, v in element.attrs.items() if isinstance(v, (str, list))},
+            "children": []
+        }
+        
+        for child in element.children:
+            child_node = parse_element(child)
+            if child_node:
+                node["children"].append(child_node)
+        
+        return node
+
+    # Start from body if available, else root
+    root = soup.body if soup.body else soup
+    return parse_element(root)
+
 from .feature_url import extract_url_features
 from .feature_html import extract_html_features
 import joblib

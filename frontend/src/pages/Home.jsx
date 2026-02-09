@@ -99,12 +99,14 @@ const Home = () => {
                         desc="Don't just get a result; understand why a site or email was flagged (XAI)."
                         delay={0.3}
                     />
-                    <FeatureCard
-                        icon={Instagram}
-                        title="Instagram Profile Analysis"
-                        desc="Detect bots and fake profiles using behavioral metadata analysis."
-                        delay={0.4}
-                    />
+                    {import.meta.env.VITE_ENABLE_INSTAGRAM_ANALYSIS !== 'false' && (
+                        <FeatureCard
+                            icon={Instagram}
+                            title="Instagram Profile Analysis"
+                            desc="Detect bots and fake profiles using behavioral metadata analysis."
+                            delay={0.4}
+                        />
+                    )}
                 </motion.div>
             </div>
 

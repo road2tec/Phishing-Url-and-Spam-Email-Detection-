@@ -69,6 +69,7 @@ const Features = () => {
         }
     ].filter(f => {
         if (import.meta.env.VITE_ENABLE_EMAIL_ANALYSIS === 'false' && f.title === "Email Signal Extraction") return false;
+        if (import.meta.env.VITE_ENABLE_INSTAGRAM_ANALYSIS === 'false' && f.title === "Instagram Bot Detection") return false;
         return true;
     });
 

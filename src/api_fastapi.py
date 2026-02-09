@@ -14,11 +14,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Feature Flags
+# Feature Flags
 ENABLE_EMAIL_ANALYSIS = os.getenv("ENABLE_EMAIL_ANALYSIS", "true").lower() == "true"
+ENABLE_INSTAGRAM_ANALYSIS = os.getenv("ENABLE_INSTAGRAM_ANALYSIS", "true").lower() == "true"
 
 from .analysis_engine import (
     fetch_live_html, extract_suspicious_snippets, analyze_phishing,
-    extract_email_signals, analyze_email_phishing
+    extract_email_signals, analyze_email_phishing, extract_dom_tree
 )
 from .feature_url import extract_url_features
 import shap
@@ -27,8 +29,13 @@ import lime.lime_tabular
 import warnings
 warnings.filterwarnings("ignore")
 
-from instagram_model.predict_instagram import InstagramPredictor
-from instagram_model.data_fetcher import get_instagram_profile_data
+try:
+    from instagram_model.predict_instagram import InstagramPredictor
+    from instagram_model.data_fetcher import get_instagram_profile_data
+except ImportError:
+    print("Warning: instagram_model module not found. Instagram analysis will be disabled.")
+    InstagramPredictor = None
+    get_instagram_profile_data = None
 
 app = FastAPI()
 
@@ -161,7 +168,14 @@ except Exception as e:
         email_ml_model = None
 
 # Initialize Instagram Model
-insta_predictor = InstagramPredictor()
+if InstagramPredictor:
+    try:
+        insta_predictor = InstagramPredictor()
+    except Exception as e:
+        print(f"Failed to intialize Instagram Predictor: {e}")
+        insta_predictor = None
+else:
+    insta_predictor = None
 
 def simple_url_features(url):
     """Enhanced phishing detection using multiple heuristics"""
@@ -388,6 +402,15 @@ def api_extract_url_signals(data: PredictionRequest):
     snippets = extract_suspicious_snippets(html)
     return {"snippets": snippets}
 
+@app.post("/api/fetch-dom-tree")
+def api_fetch_dom_tree(data: PredictionRequest):
+    html = data.html
+    if not html and data.url:
+        html = fetch_live_html(data.url)
+    
+    tree = extract_dom_tree(html)
+    return {"dom_tree": tree}
+
 @app.post("/api/analyze-url")
 def api_analyze_url(data: PredictionRequest):
     """
@@ -450,7 +473,9 @@ def api_analyze_url(data: PredictionRequest):
                 top_features = []
                 for name, val in sorted_features[:3]:
                     impact = "Increases Risk" if val > 0 else "Decreases Risk"
-                    top_features.append(f"{name} ({impact})")
+                    # Get the actual value for the feature
+                    feature_value = feats.get(name, "N/A")
+                    top_features.append(f"{name}: {feature_value} ({impact})")
                 
                 explanation["top_features"] = top_features
                 
@@ -656,6 +681,8 @@ def get_dashboard_stats(user_id: str = None):
 
 @app.post("/api/analyze-instagram-profile")
 def analyze_instagram_profile(data: InstagramRequest):
+    if not ENABLE_INSTAGRAM_ANALYSIS:
+        raise HTTPException(status_code=403, detail="Instagram analysis feature is disabled")
     """
     Analyzes an Instagram profile for phishing indicators.
     1. Fetches public metadata (mocked for demo).
@@ -665,6 +692,9 @@ def analyze_instagram_profile(data: InstagramRequest):
     username = data.username
     
     # 1. Fetch Data
+    if not get_instagram_profile_data or not insta_predictor:
+         raise HTTPException(status_code=503, detail="Instagram module is not installed or failed to load.")
+
     features = get_instagram_profile_data(username)
     
     # 2. Predict
