@@ -22,7 +22,6 @@ PhishGuard Pro is a premium, production-ready phishing detection system featurin
 - **Explainable Results (XAI)**: Detailed risk scores (0-100%) with **Live Factor Values** (e.g., actual Digit Count, URL Length) powered by SHAP & LIME.
 - **Live DOM Tree Hierarchy**: Interactive, hierarchical visualization of the website's structure to detect hidden elements.
 - **ML & Heuristics**: Hybrid approach using Random Forest models and custom behavioral rules.
-- **📸 [NEW] Instagram Profile Analysis**: Detects fake/phishing Instagram profiles using metadata analysis.
 - **🧩 Browser Extension**: Real-time enforcement that blocks malicious URLs before page load.
 
 ### ⚙️ Backend & Resilience
@@ -117,11 +116,6 @@ npm run dev
 ### 🛡️ Browser Extension
 - Real-time protection across the web.
 - Automatically blocks high-risk URLs registered in the system.
-
-### 📸 Instagram Profile Scanner
-- Analyze an Instagram profile by username to check for bot/scammer indicators.
-- **API Endpoint**: `POST /api/analyze-instagram-profile`
-- **Explainability**: Returns top reasons for the decision (e.g., "Account is very new", "Suspicious link in bio").
 
 ---
 
