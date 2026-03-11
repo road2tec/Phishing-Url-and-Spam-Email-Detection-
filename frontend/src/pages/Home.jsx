@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Shield, Lock, Search, AlertTriangle, ArrowRight, Activity, Terminal, Database, Users, Instagram } from 'lucide-react';
+import { Shield, Lock, Search, AlertTriangle, ArrowRight, Activity, Terminal, Database, Users } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
@@ -99,14 +99,6 @@ const Home = () => {
                         desc="Don't just get a result; understand why a site or email was flagged (XAI)."
                         delay={0.3}
                     />
-                    {import.meta.env.VITE_ENABLE_INSTAGRAM_ANALYSIS !== 'false' && (
-                        <FeatureCard
-                            icon={Instagram}
-                            title="Instagram Profile Analysis"
-                            desc="Detect bots and fake profiles using behavioral metadata analysis."
-                            delay={0.4}
-                        />
-                    )}
                 </motion.div>
             </div>
 

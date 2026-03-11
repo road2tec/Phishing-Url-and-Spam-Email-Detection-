@@ -10,8 +10,7 @@ import {
     Clock,
     TrendingUp,
     AlertCircle,
-    ArrowUpRight,
-    Instagram
+    ArrowUpRight
 } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import { fetchDashboardStats } from '../utils/api';
@@ -314,14 +313,13 @@ const DashboardHome = () => {
                         <tbody className="divide-y divide-white/5">
                             {stats?.recent_scans?.filter(scan => {
                                 if (import.meta.env.VITE_ENABLE_EMAIL_ANALYSIS === 'false' && scan.type === 'email_analysis') return false;
-                                if (import.meta.env.VITE_ENABLE_INSTAGRAM_ANALYSIS === 'false' && (scan.type === 'instagram_phishing' || scan.type === 'instagram_analysis')) return false;
                                 return true;
                             }).map((scan, i) => (
                                 <tr key={i} className="hover:bg-white/[0.02] transition-colors group">
                                     <td className="px-8 py-5">
                                         <div className="flex items-center gap-3">
-                                            <div className={`p-2 rounded-lg ${scan.type === 'email_analysis' ? 'bg-indigo-500/10 text-indigo-400' : (scan.type && scan.type.includes('instagram') ? 'bg-pink-500/10 text-pink-400' : 'bg-cyan-500/10 text-cyan-400')}`}>
-                                                {scan.type === 'email_analysis' ? <Mail className="w-4 h-4" /> : (scan.type && scan.type.includes('instagram') ? <Instagram className="w-4 h-4" /> : <Globe className="w-4 h-4" />)}
+                                            <div className={`p-2 rounded-lg ${scan.type === 'email_analysis' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-cyan-500/10 text-cyan-400'}`}>
+                                                {scan.type === 'email_analysis' ? <Mail className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
                                             </div>
                                             <span className="text-sm font-medium text-white/80 capitalize">{scan.type.replace('_', ' ')}</span>
                                         </div>

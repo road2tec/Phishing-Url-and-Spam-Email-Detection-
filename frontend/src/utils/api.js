@@ -12,7 +12,6 @@ const api = axios.create({
 export const fetchUrlHtml = (url) => api.post('/api/fetch-url', { url });
 export const extractUrlSignals = (url, html) => api.post('/api/extract-url-signals', { url, html });
 export const analyzeUrl = (url, html, user_id) => api.post('/api/analyze-url', { url, html, user_id });
-export const analyzeInstagramProfile = (username, user_id) => api.post('/api/analyze-instagram-profile', { username, user_id });
 
 export const extractEmailSignals = (email_text) => api.post('/api/extract-email-signals', { email_text });
 export const analyzeEmail = (email_text, user_id) => api.post('/api/analyze-email', { email_text, user_id });

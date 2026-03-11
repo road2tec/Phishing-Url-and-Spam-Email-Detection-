@@ -8,8 +8,7 @@ import {
     Code2,
     MailWarning,
 
-    ArrowLeft,
-    Instagram
+    ArrowLeft
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -30,12 +29,6 @@ const Features = () => {
             title: "Real-time HTML Analysis",
             desc: "Instant fetching and parsing of live webpage source code to identify suspicious patterns before they reach the user.",
             color: "blue"
-        },
-        {
-            icon: Instagram,
-            title: "Instagram Bot Detection",
-            desc: "Analyze profile metadata (followers, bio links, account age) to identify fake accounts and phishing attempts.",
-            color: "pink"
         },
         {
             icon: MailWarning,
@@ -69,7 +62,6 @@ const Features = () => {
         }
     ].filter(f => {
         if (import.meta.env.VITE_ENABLE_EMAIL_ANALYSIS === 'false' && f.title === "Email Signal Extraction") return false;
-        if (import.meta.env.VITE_ENABLE_INSTAGRAM_ANALYSIS === 'false' && f.title === "Instagram Bot Detection") return false;
         return true;
     });
 

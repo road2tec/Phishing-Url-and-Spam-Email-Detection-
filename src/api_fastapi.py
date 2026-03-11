@@ -16,7 +16,6 @@ load_dotenv()
 # Feature Flags
 # Feature Flags
 ENABLE_EMAIL_ANALYSIS = os.getenv("ENABLE_EMAIL_ANALYSIS", "true").lower() == "true"
-ENABLE_INSTAGRAM_ANALYSIS = os.getenv("ENABLE_INSTAGRAM_ANALYSIS", "true").lower() == "true"
 
 from .analysis_engine import (
     fetch_live_html, extract_suspicious_snippets, analyze_phishing,
@@ -28,14 +27,6 @@ import lime
 import lime.lime_tabular
 import warnings
 warnings.filterwarnings("ignore")
-
-try:
-    from instagram_model.predict_instagram import InstagramPredictor
-    from instagram_model.data_fetcher import get_instagram_profile_data
-except ImportError:
-    print("Warning: instagram_model module not found. Instagram analysis will be disabled.")
-    InstagramPredictor = None
-    get_instagram_profile_data = None
 
 app = FastAPI()
 
@@ -96,10 +87,6 @@ class URLRequest(BaseModel):
 
 class EmailRequest(BaseModel):
     email_text: str
-    user_id: str = None
-
-class InstagramRequest(BaseModel):
-    username: str
     user_id: str = None
 
 # Load URL Random Forest model (Rule-based features)
@@ -166,16 +153,6 @@ except Exception as e:
         print("Loaded with joblib fallback.")
     except:
         email_ml_model = None
-
-# Initialize Instagram Model
-if InstagramPredictor:
-    try:
-        insta_predictor = InstagramPredictor()
-    except Exception as e:
-        print(f"Failed to intialize Instagram Predictor: {e}")
-        insta_predictor = None
-else:
-    insta_predictor = None
 
 def simple_url_features(url):
     """Enhanced phishing detection using multiple heuristics"""
@@ -678,43 +655,3 @@ def get_dashboard_stats(user_id: str = None):
     except Exception as e:
         print(f"Error fetching stats: {e}")
         return {"error": str(e)}
-
-@app.post("/api/analyze-instagram-profile")
-def analyze_instagram_profile(data: InstagramRequest):
-    if not ENABLE_INSTAGRAM_ANALYSIS:
-        raise HTTPException(status_code=403, detail="Instagram analysis feature is disabled")
-    """
-    Analyzes an Instagram profile for phishing indicators.
-    1. Fetches public metadata (mocked for demo).
-    2. Runs Random Forest model.
-    3. Returns prediction and explanation.
-    """
-    username = data.username
-    
-    # 1. Fetch Data
-    if not get_instagram_profile_data or not insta_predictor:
-         raise HTTPException(status_code=503, detail="Instagram module is not installed or failed to load.")
-
-    features = get_instagram_profile_data(username)
-    
-    # 2. Predict
-    prediction, confidence, explanation = insta_predictor.predict(features)
-    
-    # 3. Decision Logic
-    should_block = False
-    if prediction == "phishing" and confidence >= 0.7:
-        should_block = True
-    
-    # Log to DB (optional, reusing history collection if needed)
-    if should_block:
-         log_to_db("instagram_phishing", username, "Phishing", int(confidence * 100), explanation.get("top_reasons", []), user_id=data.user_id)
-    
-    return {
-        "platform": "instagram",
-        "username": username,
-        "prediction": prediction,
-        "confidence": round(confidence, 2),
-        "block": should_block,
-        "explanation": explanation,
-        "features_analyzed": features # Returning features for transparency in demo
-    }
