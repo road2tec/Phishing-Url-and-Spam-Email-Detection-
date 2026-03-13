@@ -14,14 +14,14 @@ const UrlAnalysis = () => {
     const [results, setResults] = useState(null);
     const [loading, setLoading] = useState({ fetch: false, analyze: false });
     const [error, setError] = useState('');
-    const [showCode, setShowCode] = useState(true);
+    const [showCode, setShowCode] = useState(false);
     const [showDom, setShowDom] = useState(false);
 
-    const handleFetch = async (e) => {
+    const handleFetchAndAnalyze = async (e) => {
         e.preventDefault();
         if (!url) return;
 
-        setLoading({ ...loading, fetch: true });
+        setLoading({ fetch: true, analyze: true });
         setError('');
         setHtml('');
         setSnippets('');
@@ -29,69 +29,75 @@ const UrlAnalysis = () => {
         setResults(null);
 
         try {
+            // Step 1: Fetch
             const res = await fetchUrlHtml(url);
-            setHtml(res.data.html);
+            const fetchedHtml = res.data.html;
+            setHtml(fetchedHtml);
 
-            const signalsRes = await extractUrlSignals(url, res.data.html);
+            // Step 2: Extract Signals and DOM in background
+            const [signalsRes, domRes] = await Promise.all([
+                extractUrlSignals(url, fetchedHtml),
+                fetchDomTree(url, fetchedHtml)
+            ]);
             setSnippets(signalsRes.data.snippets);
-
-            const domRes = await fetchDomTree(url, res.data.html);
             setDomTree(domRes.data.dom_tree);
-        } catch (err) {
-            setError(err.response?.data?.detail || 'Failed to fetch URL content. Make sure the backend is running.');
-        } finally {
-            setLoading({ ...loading, fetch: false });
-        }
-    };
 
-    const handleAnalyze = async () => {
-        setLoading({ ...loading, analyze: true });
-        try {
+            // Step 3: Final Analysis
             const user = JSON.parse(localStorage.getItem('phishguard_currentUser') || '{}');
-            const res = await analyzeUrl(url, html, user.id);
-            setResults(res.data);
+            const analysisRes = await analyzeUrl(url, fetchedHtml, user.id);
+            setResults(analysisRes.data);
         } catch (err) {
-            setError('Analysis failed. Please try again.');
+            setError(err.response?.data?.detail || 'Analysis sequence failed. Ensure backend and target URL are accessible.');
         } finally {
-            setLoading({ ...loading, analyze: false });
+            setLoading({ fetch: false, analyze: false });
         }
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8">
-            <div className="text-center md:text-left">
-                <h2 className="text-3xl font-bold text-white mb-2">URL Live Analysis</h2>
-                <p className="text-white/50 text-sm">Observe live HTML source code to identify potential hidden threats.</p>
+        <div className="max-w-4xl mx-auto space-y-10 py-6">
+            <div className="text-center md:text-left space-y-2">
+                <h2 className="text-4xl font-extrabold text-emerald-900 tracking-tight">Real-time URL Forensics</h2>
+                <p className="text-emerald-800/60 text-lg font-medium">Deep-scanning URLs for structural and behavioral phishing patterns.</p>
             </div>
 
-            {/* Step 1: URL Input */}
-            <div className="glass-morphism p-8 rounded-3xl border border-white/5 shadow-xl">
-                <form onSubmit={handleFetch} className="space-y-6">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-white/70 ml-1 uppercase tracking-widest">Enter URL to observe</label>
-                        <div className="relative">
-                            <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-cyber-accent" />
+            {/* URL Input */}
+            <div className="bg-white p-8 rounded-[2.5rem] border border-emerald-100 shadow-2xl shadow-emerald-700/5">
+                <form onSubmit={handleFetchAndAnalyze} className="space-y-6">
+                    <div className="space-y-3">
+                        <label className="text-xs font-black text-emerald-800/40 ml-1 uppercase tracking-[0.2em] flex items-center gap-2">
+                            <div className="p-1.5 bg-emerald-100 rounded-lg">
+                                <Globe className="w-3.5 h-3.5 text-emerald-600" />
+                            </div>
+                            Target Destination
+                        </label>
+                        <div className="relative group">
+                            <div className="absolute left-6 top-1/2 -translate-y-1/2 p-2 bg-emerald-50 rounded-xl group-focus-within:bg-emerald-100 transition-colors">
+                                <Globe className="w-5 h-5 text-emerald-600" />
+                            </div>
                             <input
                                 type="url"
                                 value={url}
                                 onChange={(e) => setUrl(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium"
-                                placeholder="https://secure-login.bank.com"
+                                className="w-full bg-emerald-50/30 border border-emerald-100 rounded-3xl py-6 pl-16 pr-8 text-emerald-900 placeholder:text-emerald-900/20 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/30 transition-all font-bold text-lg shadow-inner"
+                                placeholder="https://external-login-portal.com"
                                 required
                             />
                         </div>
                     </div>
                     <button
                         type="submit"
-                        disabled={loading.fetch}
-                        className="w-full py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl border border-white/10 transition-all flex items-center justify-center gap-2 group"
+                        disabled={loading.fetch || loading.analyze}
+                        className="w-full py-6 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white font-black text-xl rounded-3xl shadow-xl shadow-emerald-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-4 uppercase tracking-[0.1em]"
                     >
-                        {loading.fetch ? (
-                            <div className="w-5 h-5 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div>
+                        {loading.analyze ? (
+                            <div className="flex items-center gap-3">
+                                <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span>Scanning DNA...</span>
+                            </div>
                         ) : (
                             <>
-                                <Search className="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform" />
-                                <span>Fetch HTML Source</span>
+                                <Search className="w-6 h-6" />
+                                <span>Analyze Website Now</span>
                             </>
                         )}
                     </button>
@@ -102,107 +108,91 @@ const UrlAnalysis = () => {
             <AnimatePresence>
                 {error && (
                     <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="p-4 bg-red-400/10 border border-red-400/20 rounded-2xl flex items-center gap-3 text-red-400 text-sm"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="p-5 bg-red-50 border border-red-100 rounded-3xl flex items-center gap-4 text-red-600 text-sm font-bold shadow-lg shadow-red-500/5"
                     >
-                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                        <AlertCircle className="w-6 h-6 flex-shrink-0" />
                         <span>{error}</span>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* Step 2: Content Display & Analysis */}
-            <AnimatePresence>
-                {snippets && (
+            {/* Results & Deep Dive Toggle */}
+            <AnimatePresence mode="wait">
+                {results && !loading.analyze && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        key="results"
+                        initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="space-y-8"
                     >
-                        <div className="glass-morphism rounded-3xl border border-white/5 overflow-hidden">
-                            <button
-                                onClick={() => setShowCode(!showCode)}
-                                className="w-full p-6 flex items-center justify-between hover:bg-white/5 transition-colors"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-lg bg-emerald-500/10">
-                                        <Code2 className="w-5 h-5 text-emerald-400" />
-                                    </div>
-                                    <h3 className="font-bold text-white">Suspicious HTML Snippets</h3>
-                                </div>
-                                {showCode ? <ChevronUp className="text-white/30" /> : <ChevronDown className="text-white/30" />}
-                            </button>
+                        <ResultCard {...results} />
 
-                            {showCode && (
-                                <motion.div
-                                    initial={{ height: 0 }}
-                                    animate={{ height: 'auto' }}
-                                    className="px-6 pb-6"
-                                >
-                                    <pre className="bg-cyber-dark/50 p-6 rounded-2xl border border-white/5 text-xs text-emerald-300 font-mono overflow-auto max-h-[300px] leading-relaxed">
-                                        <code>{snippets}</code>
-                                    </pre>
-                                    <p className="mt-4 text-[11px] text-white/30 italic flex items-center gap-2">
-                                        <AlertCircle className="w-3 h-3" />
-                                        Review the code above for suspicious forms, login fields, or unknown external scripts.
-                                    </p>
-                                </motion.div>
-                            )}
-                        </div>
-
-                        {/* DOM Tree Section */}
-                        {domTree && (
-                            <div className="glass-morphism rounded-3xl border border-white/5 overflow-hidden">
-                                <button
-                                    onClick={() => setShowDom(!showDom)}
-                                    className="w-full p-6 flex items-center justify-between hover:bg-white/5 transition-colors"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 rounded-lg bg-cyber-accent/10">
-                                            <div className="w-5 h-5 border-2 border-cyber-accent rounded-sm" />
-                                        </div>
-                                        <h3 className="font-bold text-white">Live DOM Tree Structure</h3>
-                                    </div>
-                                    {showDom ? <ChevronUp className="text-white/30" /> : <ChevronDown className="text-white/30" />}
-                                </button>
-
-                                {showDom && (
-                                    <motion.div
-                                        initial={{ height: 0 }}
-                                        animate={{ height: 'auto' }}
-                                        className="px-6 pb-6"
+                        {/* Technical Deep Dive Section (Hidden by default like user asked) */}
+                        <div className="space-y-4 pt-4 border-t border-emerald-100">
+                             <div className="flex items-center justify-between px-2">
+                                <h3 className="text-sm font-black text-emerald-900/40 uppercase tracking-widest">Technical Deep Dive</h3>
+                                <div className="flex gap-3">
+                                    <button 
+                                        onClick={() => setShowCode(!showCode)}
+                                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${showCode ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-emerald-600 border-emerald-200 hover:bg-emerald-50'}`}
                                     >
-                                        <DomTreeView tree={domTree} />
+                                        Source Snippets
+                                    </button>
+                                    <button 
+                                        onClick={() => setShowDom(!showDom)}
+                                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${showDom ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-emerald-600 border-emerald-200 hover:bg-emerald-50'}`}
+                                    >
+                                        DOM Blueprint
+                                    </button>
+                                </div>
+                             </div>
+
+                             <AnimatePresence>
+                                {showCode && snippets && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="overflow-hidden"
+                                    >
+                                        <div className="bg-emerald-950 p-6 rounded-[2rem] border border-emerald-800/20 shadow-xl">
+                                            <div className="flex items-center gap-2 mb-4 text-emerald-400">
+                                                <Code2 className="w-4 h-4" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest">Suspicious HTML Payload</span>
+                                            </div>
+                                            <pre className="text-xs text-emerald-300 font-mono overflow-auto max-h-[300px] leading-relaxed custom-scrollbar">
+                                                <code>{snippets}</code>
+                                            </pre>
+                                        </div>
                                     </motion.div>
                                 )}
-                            </div>
-                        )}
 
-                        {!results && (
-                            <button
-                                onClick={handleAnalyze}
-                                disabled={loading.analyze}
-                                className="w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-lg rounded-3xl shadow-2xl shadow-emerald-600/20 transition-all flex items-center justify-center gap-3 uppercase tracking-widest"
-                            >
-                                {loading.analyze ? (
-                                    <span className="animate-pulse">Analyzing Pattern...</span>
-                                ) : (
-                                    <>
-                                        <Search className="w-6 h-6" />
-                                        <span>Analyze for Phishing</span>
-                                    </>
+                                {showDom && domTree && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="overflow-hidden"
+                                    >
+                                        <div className="bg-white p-6 rounded-[2rem] border border-emerald-100 shadow-xl">
+                                            <div className="flex items-center gap-2 mb-4 text-emerald-600">
+                                                <div className="w-3 h-3 border-2 border-emerald-600 rounded-sm" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest">Live Document Model</span>
+                                            </div>
+                                            <DomTreeView tree={domTree} />
+                                        </div>
+                                    </motion.div>
                                 )}
-                            </button>
-                        )}
-
-                        {loading.analyze && <Loader text="Executing Deep Heuristic Analysis Engine..." />}
-
-                        {results && <ResultCard {...results} />}
+                             </AnimatePresence>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {(loading.fetch || loading.analyze) && <Loader text="Synchronizing Forensic Data..." />}
         </div>
     );
 };

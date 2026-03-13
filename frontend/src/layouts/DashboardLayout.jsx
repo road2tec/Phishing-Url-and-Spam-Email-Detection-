@@ -9,21 +9,21 @@ const DashboardLayout = () => {
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
     return (
-        <div className="min-h-screen bg-cyber-dark relative">
+        <div className="min-h-screen bg-white relative">
             {/* Sidebar - Handles its own mobile state */}
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
             {/* Mobile Sidebar Toggle - Only visible on small screens */}
             <button
                 onClick={toggleSidebar}
-                className="lg:hidden fixed top-4 right-4 z-40 p-3 bg-emerald-600 text-white rounded-xl shadow-lg border border-emerald-500/20 active:scale-95 transition-transform"
+                className="lg:hidden fixed top-6 right-6 z-[60] p-4 bg-emerald-600 text-white rounded-2xl shadow-xl shadow-emerald-500/20 active:scale-95 transition-all"
             >
                 <Menu className="w-6 h-6" />
             </button>
 
             {/* Main Content Area */}
-            <div className={`transition-all duration-300 ${isSidebarOpen ? 'lg:pl-72' : 'lg:pl-72'}`}>
-                <main className="p-4 md:p-8 lg:p-12 mx-auto max-w-7xl animate-fade-in">
+            <div className={`transition-all duration-300 lg:pl-72`}>
+                <main className="p-4 md:p-8 lg:p-12 mx-auto max-w-7xl animate-fade-in min-h-screen">
                     <Outlet />
                 </main>
             </div>

@@ -27,7 +27,6 @@ function App() {
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<DashboardHome />} />
         <Route path="url" element={<UrlAnalysis />} />
-        <Route path="url" element={<UrlAnalysis />} />
         {import.meta.env.VITE_ENABLE_EMAIL_ANALYSIS !== 'false' && (
           <Route path="email" element={<EmailAnalysis />} />
         )}

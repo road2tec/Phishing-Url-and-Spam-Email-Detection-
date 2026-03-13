@@ -2,36 +2,35 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Menu, User } from 'lucide-react';
 
-const Navbar = ({ toggleSidebar }) => {
+const Navbar = ({ ToggleSidebar }) => {
     return (
-        <nav className="sticky top-0 z-50 w-full glass-morphism border-b border-white/10 px-4 py-3">
-            <div className="flex items-center justify-between mx-auto max-w-7xl">
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={toggleSidebar}
-                        className="p-2 hover:bg-white/10 rounded-lg lg:hidden transition-colors"
-                    >
-                        <Menu className="w-6 h-6 text-cyber-accent" />
-                    </button>
-                    <Link to="/" className="flex items-center gap-2 group">
-                        <Shield className="w-8 h-8 text-cyber-accent group-hover:scale-110 transition-transform" />
-                        <span className="text-xl font-bold text-gradient">PhishGuard Pro</span>
-                    </Link>
-                </div>
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-emerald-950/90 backdrop-blur-xl border-b border-white/5 h-20 shadow-2xl">
+            <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
+                <Link to="/" className="flex items-center gap-3 group">
+                    <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20 group-hover:rotate-12 transition-transform">
+                        <Shield className="w-6 h-6 text-emerald-400" />
+                    </div>
+                    <span className="text-xl font-black text-white tracking-tighter uppercase italic">PhishGuard</span>
+                </Link>
 
-                <div className="hidden md:flex items-center gap-8">
-                    <Link to="/" className="text-sm font-medium text-white/70 hover:text-white transition-colors">Home</Link>
-                    <Link to="/features" className="text-sm font-medium text-white/70 hover:text-white transition-colors">Features</Link>
-                    <Link to="/how-it-works" className="text-sm font-medium text-white/70 hover:text-white transition-colors">How it Works</Link>
-                    <Link to="/about" className="text-sm font-medium text-white/70 hover:text-white transition-colors">About Us</Link>
-                    <Link to="/login" className="px-4 py-2 text-sm font-medium text-white hover:text-white/90 bg-white/10 hover:bg-white/20 rounded-lg transition-all">Login</Link>
-                    <Link to="/register" className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-lg shadow-emerald-500/20 transition-all">Get Started</Link>
+                <div className="hidden md:flex items-center gap-10">
+                    <Link to="/features" className="text-[10px] font-black text-emerald-100/50 hover:text-emerald-400 uppercase tracking-[0.2em] transition-all">Features</Link>
+                    <Link to="/how-it-works" className="text-[10px] font-black text-emerald-100/50 hover:text-emerald-400 uppercase tracking-[0.2em] transition-all">How it Works</Link>
+                    <Link to="/about" className="text-[10px] font-black text-emerald-100/50 hover:text-emerald-400 uppercase tracking-[0.2em] transition-all">About Us</Link>
+                    
+                    <div className="flex items-center gap-4 ml-6">
+                        <Link to="/login" className="px-6 py-2.5 text-[10px] font-black text-white hover:text-emerald-400 uppercase tracking-widest transition-all">Login</Link>
+                        <Link to="/register" className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-emerald-500/20">Sign Up</Link>
+                    </div>
                 </div>
-
+                {/* Mobile menu button - assuming this is what the user intended to keep/modify */}
                 <div className="flex items-center md:hidden">
-                    <Link to="/login" className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                        <User className="w-6 h-6 text-white/70" />
-                    </Link>
+                    <button
+                        onClick={ToggleSidebar} // Use the new prop name
+                        className="p-2 hover:bg-emerald-800 rounded-lg transition-colors"
+                    >
+                        <Menu className="w-6 h-6 text-emerald-400" />
+                    </button>
                 </div>
             </div>
         </nav>

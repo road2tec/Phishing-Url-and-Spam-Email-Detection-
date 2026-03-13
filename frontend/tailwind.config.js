@@ -21,10 +21,16 @@ export default {
                     950: '#052e16',
                 },
                 cyber: {
-                    dark: '#020617', // Deeper obsidian
-                    light: '#064e3b', // Deep emerald for backgrounds
+                    dark: '#022c22', // Dark green instead of black
+                    light: '#f0fdf4', // Very light green for backgrounds
                     accent: '#10b981', // Vibrant emerald
-                    mint: '#34d399',  // Mint green for text/highlights
+                    mint: '#34d399',  // Mint green
+                },
+                brand: {
+                    white: '#ffffff',
+                    offwhite: '#f8fafc',
+                    green: '#10b981',
+                    dark: '#064e3b',
                 }
             },
             animation: {
