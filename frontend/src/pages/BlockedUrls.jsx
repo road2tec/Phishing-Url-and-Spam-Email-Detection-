@@ -46,90 +46,114 @@ const BlockedUrls = () => {
     };
 
     return (
-        <div className="space-y-10 pb-12">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-4xl font-black text-emerald-950 mb-3 tracking-tight underline decoration-emerald-100 underline-offset-8">Blocked Registry</h2>
-                    <p className="text-emerald-900/40 font-bold uppercase tracking-widest text-[10px]">Real-time enforcement protocol logs enabled</p>
+        <div className="space-y-12 pb-12 relative animate-fade-in">
+            {/* Ambient background glow */}
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 pb-10 border-b border-white/5 relative z-10">
+                <div className="space-y-4">
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="inline-flex items-center gap-3 px-5 py-2 rounded-full glass-card border-white/10 text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] shadow-xl"
+                    >
+                        <ShieldAlert className="w-4 h-4" />
+                        Live Enforcement Registry
+                    </motion.div>
+                    <h2 className="text-6xl font-black text-white tracking-tighter uppercase leading-none">
+                        Blocked <span className="text-gradient-emerald">Registry</span>
+                    </h2>
+                    <p className="text-slate-500 font-bold uppercase tracking-[0.4em] text-[10px]">Real-time containment protocol logs active</p>
                 </div>
                 <button
                     onClick={loadBlocklist}
-                    className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100 hover:bg-emerald-100 transition-all shadow-sm"
+                    className="p-5 glass-card text-emerald-400 rounded-3xl border border-white/5 hover:border-emerald-500/30 transition-all shadow-2xl group active:scale-95"
                 >
-                    <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                    <RefreshCw className={`w-6 h-6 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'}`} />
                 </button>
             </div>
 
             {error && (
-                <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-[10px] font-black uppercase flex items-center gap-3">
-                    <ShieldAlert className="w-5 h-5" />
+                <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-6 glass-card border-rose-500/20 rounded-[2rem] text-rose-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-5 shadow-2xl relative z-10"
+                >
+                    <ShieldAlert className="w-6 h-6" />
                     {error}
-                </div>
+                </motion.div>
             )}
 
-            <div className="bg-white rounded-[2.5rem] border border-emerald-100 shadow-[0_32px_64px_-16px_rgba(6,78,59,0.06)] overflow-hidden">
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="glass-card rounded-[4rem] border border-white/5 shadow-2xl overflow-hidden relative z-10"
+            >
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-emerald-50/50">
-                                <th className="px-10 py-6 text-[10px] font-black text-emerald-900/40 uppercase tracking-[0.2em]">Blocked Signature</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-emerald-900/40 uppercase tracking-[0.2em]">Risk Variance</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-emerald-900/40 uppercase tracking-[0.2em]">Neural Reasons</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-emerald-900/40 uppercase tracking-[0.2em] text-right">Overrides</th>
+                            <tr className="bg-white/[0.01]">
+                                <th className="px-12 py-8 text-[10px] font-black text-white/30 uppercase tracking-[0.4em]">Blocked Signature</th>
+                                <th className="px-12 py-8 text-[10px] font-black text-white/30 uppercase tracking-[0.4em]">Risk Variance</th>
+                                <th className="px-12 py-8 text-[10px] font-black text-white/30 uppercase tracking-[0.4em]">Neural Reasons</th>
+                                <th className="px-12 py-8 text-[10px] font-black text-white/30 uppercase tracking-[0.4em] text-right">Overrides</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-emerald-50">
+                        <tbody className="divide-y divide-white/5">
                             {blockedList.map((item, i) => (
                                 <motion.tr
-                                    initial={{ opacity: 0, y: 10 }}
+                                    initial={{ opacity: 0, y: 15 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.05 }}
+                                    transition={{ delay: i * 0.08 }}
                                     key={i}
-                                    className="hover:bg-emerald-50/20 transition-all group"
+                                    className="hover:bg-white/[0.03] transition-all group"
                                 >
-                                    <td className="px-10 py-7">
+                                    <td className="px-12 py-9">
                                         <div className="flex flex-col">
-                                            <span className="text-sm text-emerald-950 font-bold truncate max-w-[300px] font-mono group-hover:text-emerald-600 transition-colors">{item.url}</span>
-                                            <span className="text-[10px] text-emerald-900/30 truncate max-w-[300px] flex items-center gap-2 mt-1 font-black uppercase">
-                                                <Clock className="w-3 h-3" /> {new Date(item.timestamp).toLocaleString()}
+                                            <span className="text-base text-slate-300 font-bold truncate max-w-[350px] font-mono group-hover:text-white transition-colors underline decoration-white/5 underline-offset-4 tracking-tight">{item.url}</span>
+                                            <span className="text-[9px] text-slate-600 truncate max-w-[300px] flex items-center gap-3 mt-3 font-black uppercase tracking-[0.2em]">
+                                                <Clock className="w-3.5 h-3.5" /> Isolated at: {new Date(item.timestamp).toLocaleString()}
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-10 py-7">
-                                        <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black bg-red-50 text-red-600 border border-red-100 uppercase tracking-widest">
-                                            {item.risk_score}% RISK
-                                        </span>
+                                    <td className="px-12 py-9">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.8)]"></div>
+                                            <span className="inline-flex items-center px-4 py-2 rounded-xl text-[10px] font-black glass-card border-rose-500/20 text-rose-400 uppercase tracking-[0.2em]">
+                                                {item.risk_score}% CRITICAL
+                                            </span>
+                                        </div>
                                     </td>
-                                    <td className="px-10 py-7">
-                                        <div className="max-w-[250px] space-y-2">
+                                    <td className="px-12 py-9">
+                                        <div className="max-w-[300px] space-y-3">
                                             {item.reasons?.slice(0, 2).map((r, idx) => (
-                                                <div key={idx} className="text-[10px] text-emerald-900/40 font-bold uppercase tracking-wide flex items-center gap-2">
-                                                    <div className="w-1 h-1 rounded-full bg-emerald-300"></div>
+                                                <div key={idx} className="text-[10px] text-slate-500 font-black uppercase tracking-[0.1em] flex items-center gap-3">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-white/10"></div>
                                                     {r}
                                                 </div>
                                             ))}
                                             {item.reasons?.length > 2 && (
-                                                <div className="text-[9px] font-black text-emerald-500 uppercase tracking-widest ml-3">
-                                                    + {item.reasons.length - 2} Additional Vectors
+                                                <div className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.3em] ml-4">
+                                                    + {item.reasons.length - 2} Forensic Vectors
                                                 </div>
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-10 py-7 text-right">
-                                        <div className="flex items-center justify-end gap-3">
+                                    <td className="px-12 py-9 text-right">
+                                        <div className="flex items-center justify-end gap-5">
                                             <button
                                                 onClick={() => handleMarkSafe(item.url)}
-                                                className="p-3 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100 hover:bg-emerald-600 hover:text-white transition-all shadow-sm group/btn"
-                                                title="Re-classify as Legitimate"
+                                                className="p-4 glass-card text-emerald-400 rounded-2xl border border-white/5 hover:border-emerald-500/40 hover:bg-emerald-500/10 transition-all shadow-xl group/btn"
+                                                title="Authorization Override"
                                             >
-                                                <CheckCircle className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                                                <CheckCircle className="w-5 h-5 group-hover/btn:scale-125 transition-transform" />
                                             </button>
                                             <button
                                                 onClick={() => handleRemove(item.url)}
-                                                className="p-3 bg-red-50 text-red-600 rounded-xl border border-red-100 hover:bg-red-600 hover:text-white transition-all shadow-sm group/btn"
-                                                title="Purge from Registry"
+                                                className="p-4 glass-card text-rose-400 rounded-2xl border border-white/5 hover:border-rose-500/40 hover:bg-rose-500/10 transition-all shadow-xl group/btn"
+                                                title="Nuclear Purge"
                                             >
-                                                <Trash2 className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                                                <Trash2 className="w-5 h-5 group-hover/btn:scale-125 transition-transform" />
                                             </button>
                                         </div>
                                     </td>
@@ -137,12 +161,13 @@ const BlockedUrls = () => {
                             ))}
                             {blockedList.length === 0 && (
                                 <tr>
-                                    <td colSpan="4" className="px-10 py-24 text-center">
-                                        <div className="flex flex-col items-center gap-6">
-                                            <div className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100">
-                                                <ShieldAlert className="w-10 h-10 text-emerald-200" />
+                                    <td colSpan="4" className="px-12 py-32 text-center">
+                                        <div className="flex flex-col items-center gap-10">
+                                            <div className="w-28 h-28 rounded-full glass-card flex items-center justify-center border border-white/5 shadow-2xl relative">
+                                                <div className="absolute inset-0 rounded-full bg-emerald-500/5 animate-ping"></div>
+                                                <ShieldAlert className="w-14 h-14 text-white/5" />
                                             </div>
-                                            <p className="text-emerald-900/20 font-black uppercase tracking-widest italic text-sm">Blocklist registry is currently zeroed.</p>
+                                            <p className="text-slate-600 font-black uppercase tracking-[0.5em] text-sm">Registry zeroed. No threats contained.</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -150,7 +175,7 @@ const BlockedUrls = () => {
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 };

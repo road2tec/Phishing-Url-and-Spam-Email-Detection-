@@ -67,16 +67,16 @@ const DashboardHome = () => {
 
     if (loading && !stats) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8">
+            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-10">
                 <div className="relative">
-                    <div className="w-24 h-24 border-8 border-emerald-50 border-t-emerald-600 rounded-full animate-spin shadow-xl"></div>
+                    <div className="w-32 h-32 border-[12px] border-white/5 border-t-emerald-500 rounded-full animate-spin shadow-[0_0_50px_rgba(16,185,129,0.2)]"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <Activity className="w-10 h-10 text-emerald-600 animate-pulse" />
+                        <Activity className="w-12 h-12 text-emerald-400 animate-pulse" />
                     </div>
                 </div>
-                <div className="text-center space-y-2">
-                    <h3 className="text-2xl font-black text-emerald-950 uppercase tracking-widest">Loading Dashboard</h3>
-                    <p className="text-emerald-800/40 font-bold italic">Fetching latest security data...</p>
+                <div className="text-center space-y-3">
+                    <h3 className="text-3xl font-black text-white uppercase tracking-[0.4em]">Initializing <span className="text-gradient-emerald">Nexus</span></h3>
+                    <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Synchronizing Security Feeds...</p>
                 </div>
             </div>
         );
@@ -85,37 +85,38 @@ const DashboardHome = () => {
     return (
         <div className="space-y-12 pb-12 relative animate-fade-in">
             {/* Ambient Background Glows */}
-            <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-emerald-50 rounded-full blur-[150px] pointer-events-none -z-10"></div>
+            <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-emerald-500/5 rounded-full blur-[150px] pointer-events-none -z-10"></div>
+            <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-cyan-500/5 rounded-full blur-[150px] pointer-events-none -z-10"></div>
 
             {/* Header Section */}
-            <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-emerald-100">
-                <div className="space-y-4">
+            <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-white/5">
+                <div className="space-y-5">
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-[10px] font-black uppercase tracking-[0.2em]"
+                        className="inline-flex items-center gap-3 px-5 py-2 rounded-full glass-card border-white/10 text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] shadow-lg"
                     >
-                        <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-                        System Monitoring Active
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
+                        Neural Grid Monitor: Online
                     </motion.div>
                     <div>
-                        <h2 className="text-5xl font-black text-emerald-950 tracking-tight leading-tight">
-                            Security <span className="text-emerald-500 italic block sm:inline">Overview</span>
+                        <h2 className="text-6xl font-black text-white tracking-tighter leading-none uppercase">
+                            Security <span className="text-gradient-emerald">Nexus</span>
                         </h2>
-                        <p className="text-emerald-900/50 text-xl font-medium mt-2">Welcome, <span className="text-emerald-950 font-black underline decoration-emerald-500/30">{user?.name || 'User'}</span></p>
+                        <p className="text-slate-400 text-xl font-medium mt-4">Commanding Officer: <span className="text-white font-black underline decoration-emerald-500/30 underline-offset-8">{user?.name || 'Vanguard'}</span></p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-6">
                     {error && (
-                        <div className="px-5 py-3 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600 text-xs font-black uppercase shadow-lg shadow-red-500/5">
-                            <AlertCircle className="w-4 h-4" />
+                        <div className="px-6 py-4 glass-card border-red-500/20 rounded-3xl flex items-center gap-4 text-red-400 text-[10px] font-black uppercase tracking-widest shadow-2xl shadow-red-500/5">
+                            <AlertCircle className="w-5 h-5" />
                             {error}
                         </div>
                     )}
-                    <div className="hidden md:flex items-center gap-3 px-6 py-3 bg-white border border-emerald-100 rounded-2xl text-emerald-950 shadow-sm">
-                        <Clock className="w-4 h-4 text-emerald-400" />
-                        <span className="text-xs font-black uppercase tracking-widest">{new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                    <div className="hidden md:flex items-center gap-4 px-8 py-4 glass-card border-white/5 rounded-[2rem] text-white shadow-xl">
+                        <Clock className="w-5 h-5 text-emerald-400" />
+                        <span className="text-[11px] font-black uppercase tracking-[0.3em]">{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</span>
                     </div>
                 </div>
             </div>
@@ -127,7 +128,7 @@ const DashboardHome = () => {
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10"
             >
                 {statCards.map((stat, i) => (
-                    <StatCard key={i} {...stat} color={stat.color === 'cyan' ? 'emerald' : stat.color} />
+                    <StatCard key={i} {...stat} color={stat.color === 'cyan' ? 'cyan' : stat.color} />
                 ))}
             </motion.div>
 
@@ -138,65 +139,66 @@ const DashboardHome = () => {
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="lg:col-span-2 bg-white p-10 rounded-[3rem] border border-emerald-100 shadow-[0_32px_64px_-16px_rgba(6,78,59,0.05)] relative overflow-hidden group"
+                    className="lg:col-span-2 glass-card p-12 rounded-[3.5rem] border border-white/5 shadow-2xl relative overflow-hidden group"
                 >
-                    <div className="flex items-center justify-between mb-10 relative z-10">
-                        <div className="flex items-center gap-5">
-                            <div className="p-4 rounded-[1.5rem] bg-emerald-50 border border-emerald-100 group-hover:rotate-6 transition-transform">
-                                <TrendingUp className="w-8 h-8 text-emerald-600" />
+                    <div className="flex items-center justify-between mb-12 relative z-10">
+                        <div className="flex items-center gap-6">
+                            <div className="p-5 rounded-[2rem] glass-card border-white/10 group-hover:rotate-6 transition-transform shadow-xl">
+                                <TrendingUp className="w-8 h-8 text-emerald-400" />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-black text-emerald-950 tracking-tight">Activity Logistics</h3>
-                                <p className="text-emerald-900/40 text-xs font-black uppercase tracking-widest">Last 48 Hours Performance</p>
+                                <h3 className="text-3xl font-black text-white tracking-tighter uppercase">Forensic Velocity</h3>
+                                <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em]">Grid Throughput Logistics</p>
                             </div>
                         </div>
-                        <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-emerald-50 text-emerald-400">
-                             <ArrowUpRight className="w-6 h-6" />
+                        <div className="w-14 h-14 flex items-center justify-center rounded-[1.5rem] glass-card border-white/5 text-emerald-400 shadow-inner">
+                             <ArrowUpRight className="w-7 h-7" />
                         </div>
                     </div>
 
-                    <div className="h-[350px] w-full relative z-10">
+                    <div className="h-[380px] w-full relative z-10">
                         <ResponsiveContainer width="100%" height="100%">
-                            <ReBarChart data={activityData} barSize={45}>
-                                <CartesianGrid strokeDasharray="4 4" stroke="#064e3b08" vertical={false} />
+                            <ReBarChart data={activityData} barSize={50}>
+                                <CartesianGrid strokeDasharray="6 6" stroke="#ffffff05" vertical={false} />
                                 <XAxis
                                     dataKey="day"
-                                    stroke="#064e3b40"
+                                    stroke="#ffffff20"
                                     fontSize={10}
-                                    fontWeight={800}
+                                    fontWeight={900}
                                     tickLine={false}
                                     axisLine={false}
-                                    dy={15}
+                                    dy={20}
                                     tickFormatter={(val) => val.toUpperCase()}
                                 />
                                 <YAxis
-                                    stroke="#064e3b40"
+                                    stroke="#ffffff20"
                                     fontSize={10}
-                                    fontWeight={800}
+                                    fontWeight={900}
                                     tickLine={false}
                                     axisLine={false}
-                                    dx={-15}
+                                    dx={-20}
                                 />
                                 <Tooltip
-                                    cursor={{ fill: '#10b98108' }}
+                                    cursor={{ fill: 'rgba(255,255,255,0.03)' }}
                                     contentStyle={{
-                                        backgroundColor: '#ffffff',
-                                        border: '1px solid #10b98120',
-                                        borderRadius: '24px',
-                                        boxShadow: '0 25px 50px -12px rgba(6,78,59,0.1)',
-                                        padding: '16px'
+                                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                        borderRadius: '2rem',
+                                        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+                                        padding: '24px',
+                                        backdropFilter: 'blur(20px)'
                                     }}
-                                    itemStyle={{ color: '#064e3b', fontWeight: 900, fontSize: '14px' }}
-                                    labelStyle={{ color: '#10b981', marginBottom: '4px', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}
+                                    itemStyle={{ color: '#10b981', fontWeight: 900, fontSize: '15px' }}
+                                    labelStyle={{ color: '#94a3b8', marginBottom: '8px', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px' }}
                                 />
-                                <Bar dataKey="count" radius={[12, 12, 12, 12]}>
+                                <Bar dataKey="count" radius={[15, 15, 15, 15]}>
                                     {activityData.map((entry, index) => (
                                         <Cell
                                             key={`cell-${index}`}
                                             fill="#10b981"
-                                            fillOpacity={0.8}
-                                            stroke="#064e3b20"
-                                            strokeWidth={1}
+                                            fillOpacity={0.7}
+                                            stroke="#10b98140"
+                                            strokeWidth={2}
                                         />
                                     ))}
                                 </Bar>
@@ -210,60 +212,69 @@ const DashboardHome = () => {
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="bg-white p-10 rounded-[3rem] border border-emerald-100 shadow-[0_32px_64px_-16px_rgba(6,78,59,0.05)] relative overflow-hidden group"
+                    className="glass-card p-12 rounded-[3.5rem] border border-white/5 shadow-2xl relative overflow-hidden group"
                 >
-                    <div className="flex items-center gap-5 mb-10 relative z-10">
-                        <div className="p-4 rounded-[1.5rem] bg-indigo-50 border border-indigo-100 group-hover:-rotate-6 transition-transform">
-                            <BarChart className="w-8 h-8 text-indigo-600" />
+                    <div className="flex items-center gap-6 mb-12 relative z-10">
+                        <div className="p-5 rounded-[2rem] glass-card border-white/10 group-hover:-rotate-6 transition-transform shadow-xl">
+                            <BarChart className="w-8 h-8 text-cyan-400" />
                         </div>
                         <div>
-                            <h3 className="text-2xl font-black text-emerald-950 tracking-tight">Threat Stats</h3>
-                            <p className="text-emerald-900/40 text-xs font-black uppercase tracking-widest">Risk Category Distribution</p>
+                            <h3 className="text-3xl font-black text-white tracking-tighter uppercase">Threat Map</h3>
+                            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em]">Risk Vector Spread</p>
                         </div>
                     </div>
 
-                    <div className="h-[350px] w-full flex flex-col items-center justify-center relative z-10">
+                    <div className="h-[380px] w-full flex flex-col items-center justify-center relative z-10">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
                                     data={[
-                                        { name: 'Phishing', value: stats?.phishing_count || 0, color: '#ef4444' },
-                                        { name: 'Legitimate', value: stats?.legitimate_count || 0, color: '#10b981' }
+                                        { name: 'Threats', value: stats?.phishing_count || 0, color: '#f43f5e' },
+                                        { name: 'Authorized', value: stats?.legitimate_count || 0, color: '#10b981' }
                                     ]}
-                                    innerRadius={90}
-                                    outerRadius={120}
-                                    paddingAngle={10}
+                                    innerRadius={100}
+                                    outerRadius={135}
+                                    paddingAngle={12}
                                     dataKey="value"
-                                    cornerRadius={12}
+                                    cornerRadius={18}
                                     stroke="none"
                                 >
                                     {[
-                                        { name: 'Phishing', value: stats?.phishing_count || 0, color: '#ef4444' },
-                                        { name: 'Legitimate', value: stats?.legitimate_count || 0, color: '#10b981' }
+                                        { name: 'Threats', value: stats?.phishing_count || 0, color: '#f43f5e' },
+                                        { name: 'Authorized', value: stats?.legitimate_count || 0, color: '#10b981' }
                                     ].map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} fillOpacity={0.9} />
+                                        <Cell 
+                                            key={`cell-${index}`} 
+                                            fill={entry.color} 
+                                            fillOpacity={0.8}
+                                            stroke={entry.color}
+                                            strokeOpacity={0.2}
+                                            strokeWidth={10}
+                                        />
                                     ))}
                                 </Pie>
                                 <Tooltip
                                     contentStyle={{
-                                        backgroundColor: '#ffffff',
-                                        border: '1px solid #eeeeee',
-                                        borderRadius: '16px',
-                                        boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'
+                                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                        borderRadius: '1.5rem',
+                                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.4)',
+                                        backdropFilter: 'blur(10px)'
                                     }}
+                                    itemStyle={{ fontWeight: 900, color: '#fff' }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
 
                         {/* Custom Legend */}
-                        <div className="flex items-center gap-10 mt-[-30px]">
-                            <div className="flex items-center gap-3">
-                                <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30"></div>
-                                <span className="text-emerald-950 font-black text-xs uppercase tracking-widest">Secure</span>
+                        <div className="flex items-center gap-10 mt-[-20px]">
+                            <div className="flex items-center gap-4">
+                                <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
+                                <span className="text-slate-300 font-black text-[10px] uppercase tracking-[0.2em]">Secure</span>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <div className="w-4 h-4 rounded-full bg-red-500 shadow-lg shadow-red-500/30"></div>
-                                <span className="text-emerald-950 font-black text-xs uppercase tracking-widest">Threat</span>
+                            <div className="flex items-center gap-4">
+                                <div className="w-4 h-4 rounded-full bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.5)]"></div>
+                                <span className="text-slate-300 font-black text-[10px] uppercase tracking-[0.2em]">Infected</span>
                             </div>
                         </div>
                     </div>
@@ -275,77 +286,77 @@ const DashboardHome = () => {
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-white rounded-[3rem] border border-emerald-100 shadow-[0_32px_64px_-16px_rgba(6,78,59,0.05)] overflow-hidden"
+                className="glass-card rounded-[4rem] border border-white/5 shadow-2xl overflow-hidden"
             >
-                <div className="p-10 border-b border-emerald-50 flex items-center justify-between bg-emerald-50/20">
-                    <div className="flex items-center gap-6">
-                        <div className="p-4 rounded-[1.50rem] bg-white border border-emerald-100 shadow-sm">
-                            <Clock className="w-8 h-8 text-emerald-950" />
+                <div className="p-12 border-b border-white/5 flex flex-col md:flex-row items-center justify-between gap-8 bg-white/[0.02]">
+                    <div className="flex items-center gap-8">
+                        <div className="p-5 rounded-[2.5rem] glass-card border-white/10 shadow-2xl">
+                            <Clock className="w-10 h-10 text-white" />
                         </div>
                         <div>
-                            <h3 className="text-2xl font-black text-emerald-950 tracking-tight">Recent Scans</h3>
-                            <p className="text-emerald-900/40 text-xs font-black uppercase tracking-widest">Detailed analysis logs</p>
+                            <h3 className="text-3xl font-black text-white tracking-tighter uppercase">Intelligence Feed</h3>
+                            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em]">Live Forensic Extraction Logs</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3 px-4 py-2 bg-emerald-100/50 rounded-full border border-emerald-200/50">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span className="text-[10px] font-black text-emerald-700 uppercase tracking-[0.2em]">Live Tracking</span>
+                    <div className="flex items-center gap-4 px-6 py-3 bg-emerald-500/5 rounded-full border border-emerald-500/10 shadow-inner">
+                        <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></span>
+                        <span className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.3em]">Real-time Telemetry</span>
                     </div>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-emerald-50/10">
-                                <th className="px-10 py-6 text-[10px] font-black text-emerald-900/40 uppercase tracking-[0.2em]">Scan Type</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-emerald-900/40 uppercase tracking-[0.2em]">Input Content</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-emerald-900/40 uppercase tracking-[0.2em]">Risk Score</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-emerald-900/40 uppercase tracking-[0.2em] text-right">Verdict</th>
+                            <tr className="bg-white/[0.01]">
+                                <th className="px-12 py-8 text-[10px] font-black text-white/30 uppercase tracking-[0.4em]">Intelligence Type</th>
+                                <th className="px-12 py-8 text-[10px] font-black text-white/30 uppercase tracking-[0.4em]">Payload Metadata</th>
+                                <th className="px-12 py-8 text-[10px] font-black text-white/30 uppercase tracking-[0.4em]">Threat Level</th>
+                                <th className="px-12 py-8 text-[10px] font-black text-white/30 uppercase tracking-[0.4em] text-right">Verdict</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-emerald-50">
+                        <tbody className="divide-y divide-white/5">
                             {stats?.recent_scans?.filter(scan => {
                                 if (import.meta.env.VITE_ENABLE_EMAIL_ANALYSIS === 'false' && scan.type === 'email_analysis') return false;
                                 return true;
                             }).map((scan, i) => (
-                                <tr key={i} className="hover:bg-emerald-50/30 transition-all group">
-                                    <td className="px-10 py-7">
-                                        <div className="flex items-center gap-4">
-                                            <div className={`p-2.5 rounded-xl border ${scan.type === 'email_analysis' ? 'bg-indigo-50 border-indigo-100 text-indigo-600' : 'bg-emerald-50 border-emerald-100 text-emerald-600'}`}>
-                                                {scan.type === 'email_analysis' ? <Mail className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
+                                <tr key={i} className="hover:bg-white/[0.03] transition-all group">
+                                    <td className="px-12 py-9">
+                                        <div className="flex items-center gap-5">
+                                            <div className={`p-3 rounded-2xl glass-card border-white/10 shadow-xl ${scan.type === 'email_analysis' ? 'text-cyan-400' : 'text-emerald-400'}`}>
+                                                {scan.type === 'email_analysis' ? <Mail className="w-5 h-5" /> : <Globe className="w-5 h-5" />}
                                             </div>
-                                            <span className="text-xs font-black text-emerald-950 uppercase italic tracking-widest">{scan.type.replace('_', ' ')}</span>
+                                            <span className="text-[11px] font-black text-white uppercase tracking-widest">{scan.type.replace('_', ' ')}</span>
                                         </div>
                                     </td>
-                                    <td className="px-10 py-7">
+                                    <td className="px-12 py-9">
                                         <div className="flex flex-col">
-                                            <span className="text-sm font-bold text-emerald-900/60 group-hover:text-emerald-950 transition-colors truncate max-w-[300px] font-mono leading-none">
+                                            <span className="text-base font-bold text-slate-400 group-hover:text-white transition-colors truncate max-w-[400px] font-mono tracking-tight underline decoration-white/5">
                                                 {scan.input}
                                             </span>
-                                            <span className="text-[10px] text-emerald-800/20 mt-1 font-black uppercase">Data payload analyzed</span>
+                                            <span className="text-[9px] text-slate-600 mt-2 font-black uppercase tracking-[0.2em]">Secure Data Stream</span>
                                         </div>
                                     </td>
-                                    <td className="px-10 py-7">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-32 h-2.5 bg-emerald-50 rounded-full overflow-hidden border border-emerald-100/50 shadow-inner">
+                                    <td className="px-12 py-9">
+                                        <div className="flex items-center gap-5">
+                                            <div className="w-40 h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner p-[2px]">
                                                 <motion.div
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${scan.risk_score}%` }}
-                                                    transition={{ duration: 1, delay: i * 0.05 }}
-                                                    className={`h-full rounded-full ${scan.risk_score > 70 ? 'bg-red-500' :
-                                                        scan.risk_score > 40 ? 'bg-orange-400' : 'bg-emerald-500'
+                                                    transition={{ duration: 1.2, delay: i * 0.08 }}
+                                                    className={`h-full rounded-full shadow-[0_0_10px_currentColor] ${scan.risk_score > 70 ? 'bg-rose-500 text-rose-500/50' :
+                                                        scan.risk_score > 40 ? 'bg-amber-400 text-amber-400/50' : 'bg-emerald-500 text-emerald-500/50'
                                                         }`}
                                                 />
                                             </div>
-                                            <span className="text-[11px] font-black text-emerald-950">{scan.risk_score}%</span>
+                                            <span className="text-[12px] font-black text-white">{scan.risk_score}%</span>
                                         </div>
                                     </td>
-                                    <td className="px-10 py-7 text-right">
-                                        <span className={`inline-flex items-center gap-2 px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${scan.prediction === 'Phishing'
-                                            ? 'bg-red-600 border-red-600 text-white shadow-lg shadow-red-200'
-                                            : 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200'
+                                    <td className="px-12 py-9 text-right">
+                                        <span className={`inline-flex items-center gap-3 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] border transition-all ${scan.prediction === 'Phishing'
+                                            ? 'bg-rose-600/90 border-rose-500 text-white shadow-[0_0_25px_rgba(244,63,94,0.3)]'
+                                            : 'bg-emerald-600/90 border-emerald-500 text-white shadow-[0_0_25px_rgba(16,185,129,0.3)]'
                                             }`}>
-                                            {scan.prediction === 'Phishing' ? <ShieldAlert className="w-3.5 h-3.5" /> : <ShieldCheck className="w-3.5 h-3.5" />}
+                                            {scan.prediction === 'Phishing' ? <ShieldAlert className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
                                             {scan.prediction}
                                         </span>
                                     </td>
@@ -353,12 +364,12 @@ const DashboardHome = () => {
                             ))}
                             {(!stats?.recent_scans || stats.recent_scans.length === 0) && (
                                 <tr>
-                                    <td colSpan="4" className="px-10 py-24 text-center">
-                                        <div className="flex flex-col items-center gap-6">
-                                            <div className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100">
-                                                <Activity className="w-10 h-10 text-emerald-200" />
+                                    <td colSpan="4" className="px-12 py-32 text-center">
+                                        <div className="flex flex-col items-center gap-8">
+                                            <div className="w-24 h-24 rounded-full glass-card flex items-center justify-center border border-white/5 shadow-2xl">
+                                                <Activity className="w-12 h-12 text-white/10" />
                                             </div>
-                                            <p className="text-emerald-900/20 font-black uppercase tracking-widest italic text-sm">No forensic logs isolated in this sector.</p>
+                                            <p className="text-slate-600 font-black uppercase tracking-[0.5em] text-sm">No forensic anomalies detected in current sector.</p>
                                         </div>
                                     </td>
                                 </tr>

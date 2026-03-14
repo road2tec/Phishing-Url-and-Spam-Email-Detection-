@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Globe, Search, Code2, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Globe, Search, Code2, AlertCircle, ChevronDown, ChevronUp, Terminal, Activity } from 'lucide-react';
 import { fetchUrlHtml, extractUrlSignals, analyzeUrl, fetchDomTree } from '../utils/api';
 import Loader from '../components/Loader';
 import ResultCard from '../components/ResultCard';
@@ -77,10 +77,15 @@ const UrlAnalysis = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-10 py-6">
-            <div className="text-center md:text-left space-y-2">
-                <h2 className="text-4xl font-black text-emerald-950 tracking-tight">Analyze <span className="text-emerald-500 italic">URL</span></h2>
-                <p className="text-emerald-900/40 text-lg font-medium italic">Check websites for phishing threats and suspicious code.</p>
+        <div className="max-w-4xl mx-auto space-y-12 py-6">
+            <div className="text-center md:text-left space-y-3">
+                <h2 className="text-5xl font-black text-white tracking-tighter uppercase">
+                    Analyze <span className="text-gradient-emerald">URL</span>
+                </h2>
+                <div className="flex items-center gap-3">
+                    <div className="w-12 h-[2px] bg-emerald-500/50"></div>
+                    <p className="text-slate-500 text-sm font-bold tracking-widest uppercase">Deep Security Forensics Engine</p>
+                </div>
             </div>
 
             {/* Step 0: URL Input */}
@@ -88,19 +93,24 @@ const UrlAnalysis = () => {
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white p-10 rounded-[3rem] border border-emerald-100 shadow-[0_32px_64px_-16px_rgba(6,78,59,0.06)]"
+                    className="glass-card p-12 rounded-[3.5rem] border border-white/5 relative overflow-hidden group"
                 >
-                    <form onSubmit={handleFetch} className="space-y-8">
-                        <div className="space-y-4">
-                            <label className="text-[10px] font-black text-emerald-900/40 uppercase tracking-[0.3em] ml-4">Enter website URL</label>
-                            <div className="relative group">
-                                <Globe className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-emerald-200 group-focus-within:text-emerald-500 transition-colors" />
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[100px] -z-10 group-hover:bg-emerald-500/10 transition-colors"></div>
+                    
+                    <form onSubmit={handleFetch} className="space-y-10">
+                        <div className="space-y-6">
+                            <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em] ml-6 flex items-center gap-2">
+                                <Search className="w-3 h-3 text-emerald-500" />
+                                Target Intelligence Pointer
+                            </label>
+                            <div className="relative group/input">
+                                <Globe className="absolute left-8 top-1/2 -translate-y-1/2 w-7 h-7 text-slate-500 group-focus-within/input:text-emerald-400 transition-colors" />
                                 <input
                                     type="url"
                                     value={url}
                                     onChange={(e) => setUrl(e.target.value)}
-                                    className="w-full bg-emerald-50/30 border border-emerald-100 rounded-[2rem] py-6 pl-16 pr-8 text-emerald-950 placeholder:text-emerald-900/10 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500/30 transition-all font-bold text-lg"
-                                    placeholder="https://example.com"
+                                    className="w-full bg-slate-900/50 border border-white/10 rounded-[2.5rem] py-7 pl-20 pr-10 text-white placeholder:text-slate-600 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/40 transition-all font-bold text-xl tracking-tight"
+                                    placeholder="https://suspect-site.com"
                                     required
                                 />
                             </div>
@@ -108,120 +118,123 @@ const UrlAnalysis = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-6 bg-emerald-950 hover:bg-emerald-900 text-white font-black text-xs uppercase tracking-[0.4em] rounded-3xl shadow-2xl shadow-emerald-500/10 transition-all active:scale-95 flex items-center justify-center gap-4"
+                            className="btn-primary w-full py-7 text-xs uppercase tracking-[0.4em] rounded-[2rem]"
                         >
                             {loading ? (
-                                <div className="w-5 h-5 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+                                <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin" />
                             ) : (
-                                <>
-                                    <Search className="w-5 h-5" />
+                                <div className="flex items-center justify-center gap-4">
+                                    <Terminal className="w-5 h-5" />
                                     <span>Fetch HTML Code</span>
-                                </>
+                                </div>
                             )}
                         </button>
                     </form>
                 </motion.div>
             )}
 
-            {/* Step 1: HTML Fetched, Ready for Analysis */}
+            {/* Step 1: HTML Fetched */}
             {step === 1 && (
                 <motion.div 
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="space-y-8"
+                    className="space-y-10"
                 >
-                    {/* Status Card */}
-                    <div className="bg-emerald-950 p-10 rounded-[3rem] text-center shadow-2xl shadow-emerald-950/20 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px]"></div>
-                        <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-emerald-500/20">
-                            <Code2 className="w-8 h-8 text-emerald-400" />
-                        </div>
-                        <div className="space-y-1">
-                            <h3 className="text-xl font-black text-white italic">HTML Code Fetched</h3>
-                            <p className="text-emerald-400/50 text-[10px] uppercase font-black tracking-[0.3em]">Ready to analyze for threats</p>
+                    {/* Status Console Style */}
+                    <div className="glass-card p-10 rounded-[3rem] border border-white/5 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-[100px] -z-10"></div>
+                        <div className="flex flex-col md:flex-row items-center gap-8">
+                            <div className="w-20 h-20 bg-emerald-500/10 rounded-3xl flex items-center justify-center border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+                                <Code2 className="w-10 h-10 text-emerald-400" />
+                            </div>
+                            <div className="text-center md:text-left space-y-2">
+                                <h3 className="text-2xl font-black text-white tracking-tight uppercase">Codebase Retrieved</h3>
+                                <p className="text-emerald-400/50 text-[10px] uppercase font-black tracking-[0.3em] flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                                    Payload successfully extracted from {new URL(url).hostname}
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    {/* HTML Code Block (Always Visible Now) */}
+                    {/* HTML Terminal View */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-white p-8 rounded-[3rem] border border-emerald-100 shadow-xl overflow-hidden"
+                        className="glass-card p-8 rounded-[3.5rem] border border-white/5 overflow-hidden shadow-2xl"
                     >
-                        <div className="flex items-center gap-2 mb-4 text-emerald-900/20">
-                            <Code2 className="w-4 h-4" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Fetched HTML Code</span>
+                        <div className="flex items-center justify-between mb-6 px-4">
+                            <div className="flex items-center gap-3 text-white/30">
+                                <Code2 className="w-4 h-4" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Source Buffer (Ready)</span>
+                            </div>
+                            <div className="flex gap-1.5">
+                                <div className="w-3 h-3 rounded-full bg-white/5"></div>
+                                <div className="w-3 h-3 rounded-full bg-white/5"></div>
+                                <div className="w-3 h-3 rounded-full bg-white/5"></div>
+                            </div>
                         </div>
-                        <pre className="text-[10px] text-emerald-700 font-mono overflow-auto max-h-[350px] leading-relaxed custom-scrollbar bg-emerald-50/30 p-6 rounded-2xl border border-emerald-100/50 italic">
+                        <pre className="text-[11px] text-emerald-400/80 font-mono overflow-auto max-h-[400px] leading-relaxed custom-scrollbar bg-black/40 p-10 rounded-[2.5rem] border border-white/5">
                             <code>{html}</code>
                         </pre>
                     </motion.div>
 
-                    {/* Action Buttons Below the Code */}
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    {/* Action Hub */}
+                    <div className="flex flex-col sm:flex-row gap-6 justify-center">
                         <button
                             onClick={handleAnalyze}
                             disabled={loading}
-                            className="px-12 py-6 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.2em] text-xs rounded-3xl transition-all active:scale-95 flex items-center gap-4 shadow-xl shadow-emerald-500/20"
+                            className="btn-primary flex items-center justify-center gap-4 px-16 py-7 text-xs uppercase tracking-[0.3em] rounded-[2rem]"
                         >
                             {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Search className="w-5 h-5" />}
-                            Analyze URL
+                            Run Forensics
                         </button>
                         <button
                             onClick={() => setStep(0)}
-                            className="px-10 py-6 bg-white hover:bg-emerald-50 text-emerald-900 font-black uppercase tracking-widest text-xs rounded-3xl transition-all border border-emerald-100 shadow-sm"
+                            className="btn-outline px-12 py-7 text-xs uppercase tracking-[0.3em] rounded-[2rem]"
                         >
-                            Go Back
+                            Reset Buffer
                         </button>
                     </div>
                 </motion.div>
             )}
 
-            {/* Error Message */}
-            <AnimatePresence>
-                {error && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="p-6 bg-red-50 border border-red-100 rounded-[2rem] flex items-center gap-4 text-red-600 text-xs font-bold shadow-sm"
-                    >
-                        <AlertCircle className="w-6 h-6 flex-shrink-0" />
-                        <span>{error}</span>
-                        <button onClick={() => setError('')} className="ml-auto text-[10px] uppercase tracking-widest bg-red-100 px-3 py-1 rounded-lg">Dismiss</button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Step 2: Results Display */}
+            {/* Results Section */}
             {step === 2 && results && (
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="space-y-10"
+                    className="space-y-12"
                 >
                     <ResultCard {...results} />
 
-                    <div className="space-y-6">
-                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
-                            <h3 className="text-[10px] font-black text-emerald-900/40 uppercase tracking-[0.3em]">Technical Details</h3>
-                            <div className="flex flex-wrap justify-center gap-3">
+                    <div className="space-y-8">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 px-4">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 glass-card rounded-xl flex items-center justify-center">
+                                    <Activity className="w-5 h-5 text-emerald-400" />
+                                </div>
+                                <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Forensic Telemetry</h3>
+                            </div>
+                            
+                            <div className="flex flex-wrap justify-center gap-4">
                                 <button 
                                     onClick={() => setShowCode(!showCode)}
-                                    className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${showCode ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg' : 'bg-white text-emerald-600 border-emerald-100 hover:bg-emerald-50 shadow-sm'}`}
+                                    className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${showCode ? 'bg-emerald-600 text-white border-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'glass-card text-emerald-400 border-white/5 hover:border-emerald-500/30'}`}
                                 >
-                                    Code Snippets
+                                    Logic Snippets
                                 </button>
                                 <button 
                                     onClick={() => setShowDom(!showDom)}
-                                    className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${showDom ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg' : 'bg-white text-emerald-600 border-emerald-100 hover:bg-emerald-50 shadow-sm'}`}
+                                    className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${showDom ? 'bg-emerald-600 text-white border-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'glass-card text-emerald-400 border-white/5 hover:border-emerald-500/30'}`}
                                 >
                                     DOM Blueprint
                                 </button>
                                 <button 
                                     onClick={reset}
-                                    className="px-4 py-2.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-all border border-emerald-100"
+                                    className="px-8 py-4 glass-card text-slate-400 hover:text-white border-white/5 hover:border-white/20 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
                                 >
-                                    New Analysis
+                                    New Scan
                                 </button>
                             </div>
                         </div>
@@ -234,12 +247,13 @@ const UrlAnalysis = () => {
                                     exit={{ opacity: 0, height: 0 }}
                                     className="overflow-hidden"
                                 >
-                                    <div className="bg-emerald-950 p-10 rounded-[3rem] border border-emerald-800/20 shadow-2xl">
-                                        <div className="flex items-center gap-2 mb-6 text-emerald-400">
-                                            <Code2 className="w-5 h-5" />
-                                            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Heuristic Signal Discovery</span>
+                                    <div className="glass-card p-12 rounded-[3.5rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[100px] -z-10"></div>
+                                        <div className="flex items-center gap-3 mb-8 text-emerald-400">
+                                            <Terminal className="w-5 h-5" />
+                                            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Heuristic Signal Discoveries</span>
                                         </div>
-                                        <pre className="text-xs text-emerald-300 font-mono overflow-auto max-h-[400px] leading-loose custom-scrollbar bg-black/20 p-8 rounded-2xl italic">
+                                        <pre className="text-xs text-emerald-300 font-mono overflow-auto max-h-[500px] leading-loose custom-scrollbar bg-black/60 p-10 rounded-[2.5rem] border border-white/5 shadow-inner">
                                             <code>{snippets}</code>
                                         </pre>
                                     </div>
@@ -253,12 +267,17 @@ const UrlAnalysis = () => {
                                     exit={{ opacity: 0, height: 0 }}
                                     className="overflow-hidden"
                                 >
-                                    <div className="bg-white p-10 rounded-[3rem] border border-emerald-100 shadow-2xl">
-                                        <div className="flex items-center gap-2 mb-6 text-emerald-600">
-                                            <div className="w-4 h-4 border-2 border-emerald-600 rounded-sm" />
-                                            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Live Document Model</span>
+                                    <div className="glass-card p-12 rounded-[3.5rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                                        <div className="absolute bottom-0 left-0 w-80 h-80 bg-cyan-500/5 rounded-full blur-[120px] -z-10"></div>
+                                        <div className="flex items-center gap-3 mb-8 text-cyan-400">
+                                            <div className="w-5 h-5 glass-card border-cyan-400 flex items-center justify-center p-1">
+                                                <div className="w-full h-full bg-cyan-400 rounded-sm"></div>
+                                            </div>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Structural Document Mapping</span>
                                         </div>
-                                        <DomTreeView tree={domTree} />
+                                        <div className="bg-slate-900/50 p-10 rounded-[2.5rem] border border-white/5">
+                                            <DomTreeView tree={domTree} />
+                                        </div>
                                     </div>
                                 </motion.div>
                             )}
@@ -267,8 +286,8 @@ const UrlAnalysis = () => {
                 </motion.div>
             )}
 
-            {loading && step === 0 && <Loader text="Securing connection to destination..." />}
-            {loading && step === 1 && <Loader text="Analyzing document structure..." />}
+            {loading && step === 0 && <Loader text="Negotiating destination handshakes..." />}
+            {loading && step === 1 && <Loader text="Conducting multi-layered structural scan..." />}
         </div>
     );
 };

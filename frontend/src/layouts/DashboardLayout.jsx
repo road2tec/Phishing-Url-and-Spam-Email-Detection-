@@ -9,7 +9,8 @@ const DashboardLayout = () => {
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
     return (
-        <div className="min-h-screen bg-white relative">
+        <div className="min-h-screen bg-slate-950 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full cyber-grid opacity-20 pointer-events-none"></div>
             {/* Sidebar - Handles its own mobile state */}
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
